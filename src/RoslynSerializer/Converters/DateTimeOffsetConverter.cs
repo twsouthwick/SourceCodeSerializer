@@ -1,0 +1,15 @@
+﻿using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System;
+
+using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
+
+namespace RoslynSerializer.Converters
+{
+    public sealed class DateTimeOffsetConverter : ExpressionConverter<DateTimeOffset>
+    {
+        public override ExpressionSyntax ConvertSyntax(Type type, DateTimeOffset obj, SourceCodeSerializer serializer)
+        {
+            return ParseExpression($"new DateTimeOffset({obj.Ticks}, new TimeSpan({obj.Offset.Ticks}))");
+        }
+    }
+}
