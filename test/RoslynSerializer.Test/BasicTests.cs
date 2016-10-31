@@ -1,14 +1,6 @@
-﻿using Microsoft.CodeAnalysis.CSharp;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.IO;
 using Xunit;
 using Xunit.Abstractions;
-
-using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace RoslynSerializer
 {
@@ -35,7 +27,7 @@ namespace RoslynSerializer
 
                 _helper.WriteLine(log.ToString());
 
-                var expected = @"new RoslynSerializer.BasicTests+TestClass1
+                var expected = @"new RoslynSerializer.TestClass1
 {
     Test = 5
 }";
@@ -57,7 +49,7 @@ namespace RoslynSerializer
 
                 _helper.WriteLine(log.ToString());
 
-                var expected = @"new RoslynSerializer.BasicTests+TestClass2
+                var expected = @"new RoslynSerializer.TestClass2
 {
     Test = ""Hello world""
 }";
@@ -83,13 +75,13 @@ namespace RoslynSerializer
 
                 _helper.WriteLine(log.ToString());
 
-                var expected = @"new RoslynSerializer.BasicTests+TestClass3
+                var expected = @"new RoslynSerializer.TestClass3
 {
-    Class1 = new RoslynSerializer.BasicTests+TestClass1
+    Class1 = new RoslynSerializer.TestClass1
     {
         Test = 6
     },
-    Class2 = new RoslynSerializer.BasicTests+TestClass2
+    Class2 = new RoslynSerializer.TestClass2
     {
         Test = ""Hello world""
     }
@@ -121,15 +113,15 @@ namespace RoslynSerializer
 
 partial class Factory
 {
-    public RoslynSerializer.BasicTests+TestClass3Create()
+    public RoslynSerializer.TestClass3 Create()
     {
-        return new RoslynSerializer.BasicTests+TestClass3
+        return new RoslynSerializer.TestClass3
         {
-            Class1 = new RoslynSerializer.BasicTests+TestClass1
+            Class1 = new RoslynSerializer.TestClass1
             {
                 Test = 6
             },
-            Class2 = new RoslynSerializer.BasicTests+TestClass2
+            Class2 = new RoslynSerializer.TestClass2
             {
                 Test = ""Hello world""
             }
@@ -141,21 +133,65 @@ partial class Factory
             }
         }
 
-        private class TestClass1
+        [Fact]
+        public void NestedObjectsWithClassAndUsings()
         {
-            public int Test { get; set; }
-        }
+            using (var log = new StringWriter())
+            {
+                var obj = new TestClass3
+                {
+                    Class1 = new TestClass1 { Test = 6 },
+                    Class2 = new TestClass2 { Test = "Hello world" }
+                };
 
-        private class TestClass2
+                var node = SourceCodeSerializer.Create()
+                    .AddTextWriter(log)
+                    .AddCreateMethod("Factory")
+                    .AddUsing("RoslynSerializer")
+                    .Serialize(obj);
+
+                _helper.WriteLine(log.ToString());
+
+                var expected = @"using System;
+using RoslynSerializer;
+
+partial class Factory
+{
+    public TestClass3 Create()
+    {
+        return new TestClass3
         {
-            public string Test { get; set; }
-        }
+            Class1 = new TestClass1
+            {
+                Test = 6
+            },
+            Class2 = new TestClass2
+            {
+                Test = ""Hello world""
+            }
+        };
+    }
+}";
 
-        private class TestClass3
-        {
-            public TestClass1 Class1 { get; set; }
-
-            public TestClass2 Class2 { get; set; }
+                Assert.Equal(log.ToString(), expected);
+            }
         }
+    }
+
+    public class TestClass1
+    {
+        public int Test { get; set; }
+    }
+
+    public class TestClass2
+    {
+        public string Test { get; set; }
+    }
+
+    public class TestClass3
+    {
+        public TestClass1 Class1 { get; set; }
+
+        public TestClass2 Class2 { get; set; }
     }
 }

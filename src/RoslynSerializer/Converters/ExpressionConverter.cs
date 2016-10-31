@@ -106,7 +106,7 @@ namespace RoslynSerializer.Converters
             var items = generic.Select(item => serializer.WriteValue(item).WithLeadingTrivia(TriviaList(LineFeed)));
 
             return ArrayCreationExpression(
-                ArrayType(ParseTypeName(type.FullName), SingletonList(ArrayRankSpecifier(SingletonSeparatedList<ExpressionSyntax>(OmittedArraySizeExpression())))))
+                ArrayType(ParseTypeName(serializer.GetTypeName(type)), SingletonList(ArrayRankSpecifier(SingletonSeparatedList<ExpressionSyntax>(OmittedArraySizeExpression())))))
                 .WithInitializer(InitializerExpression(SyntaxKind.ArrayInitializerExpression, SeparatedList(items)));
         }
     }
@@ -135,7 +135,7 @@ namespace RoslynSerializer.Converters
                 }
             }).Where(prop => prop != null);
 
-            var typeName = IdentifierName(obj.GetType().ToString());
+            var typeName = IdentifierName(serializer.GetTypeName(obj.GetType()));
 
             return ObjectCreationExpression(typeName)
                      .WithInitializer(

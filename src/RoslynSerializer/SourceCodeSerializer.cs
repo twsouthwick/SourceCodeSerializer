@@ -59,6 +59,11 @@ namespace RoslynSerializer
             return new SourceCodeSerializer(_textWriter, createMethodInfo, _usings);
         }
 
+        public SourceCodeSerializer AddUsing(string @using)
+        {
+            return new SourceCodeSerializer(_textWriter, _createMethodInfo, _usings.Add(@using));
+        }
+
         public SyntaxNode Serialize<T>(T obj)
         {
             var node = Format(WriteValue(obj), typeof(T));
@@ -66,6 +71,22 @@ namespace RoslynSerializer
             Write(node);
 
             return node;
+        }
+
+        public string GetTypeName(Type type)
+        {
+            var fullName = type.FullName;
+
+            foreach (var u in _usings)
+            {
+                var up = $"{u}.";
+                if (fullName.StartsWith(up, StringComparison.Ordinal))
+                {
+                    return fullName.Substring(up.Length);
+                }
+            }
+
+            return fullName;
         }
 
         private SyntaxNode AddCreateMethod(ExpressionSyntax node, Type type)
@@ -84,7 +105,7 @@ namespace RoslynSerializer
                         ClassDeclaration(_createMethodInfo.ClassName)
                         .WithModifiers(TokenList(Token(SyntaxKind.PartialKeyword)))
                         .WithMembers(SingletonList<MemberDeclarationSyntax>(
-                                MethodDeclaration(type.GetSyntaxNode(), Identifier(_createMethodInfo.MethodName))
+                                MethodDeclaration(ParseTypeName(GetTypeName(type)), Identifier(_createMethodInfo.MethodName))
                                 .WithModifiers(TokenList(Token(SyntaxKind.PublicKeyword)))
                                 .WithBody(Block(SingletonList<StatementSyntax>(ReturnStatement(node))))
                         ))
