@@ -24,9 +24,16 @@ namespace RoslynSerializer.Converters
                 {
                     var value = property.GetValue(obj);
                     var expression = serializer.WriteValue(value);
+                    var assignment = AssignmentExpression(SyntaxKind.SimpleAssignmentExpression, IdentifierName(property.Name), expression);
 
-                    return AssignmentExpression(SyntaxKind.SimpleAssignmentExpression, IdentifierName(property.Name), expression)
-                        .WithLeadingTrivia(TriviaList(LineFeed));
+                    if (serializer.Settings.ObjectInitializationNewLine)
+                    {
+                        return assignment.WithLeadingTrivia(TriviaList(LineFeed));
+                    }
+                    else
+                    {
+                        return assignment;
+                    }
                 }
                 catch (Exception)
                 {

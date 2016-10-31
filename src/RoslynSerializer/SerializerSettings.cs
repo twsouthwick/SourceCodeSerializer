@@ -6,12 +6,12 @@ namespace RoslynSerializer
 {
     public class SerializerSettings
     {
+        private static readonly SerializerSettings s_default = new SerializerSettings(ImmutableDictionary.Create<string, bool>(StringComparer.Ordinal))
+            .WithObjectInitializationNewLine(true);
+
         private readonly ImmutableDictionary<string, bool> _values;
 
-        public static SerializerSettings Create()
-        {
-            return new SerializerSettings(ImmutableDictionary.Create<string, bool>(StringComparer.Ordinal));
-        }
+        public static SerializerSettings Create() => s_default;
 
         private SerializerSettings(ImmutableDictionary<string, bool> values)
         {
@@ -38,7 +38,7 @@ namespace RoslynSerializer
 
         private SerializerSettings SetValue(string key, bool value)
         {
-            return new SerializerSettings(_values.Add(key, value));
+            return new SerializerSettings(_values.SetItem(key, value));
         }
     }
 }
