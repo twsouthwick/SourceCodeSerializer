@@ -53,7 +53,7 @@ namespace RoslynSerializer.Converters
 
         public override ExpressionSyntax ConvertSyntax(Type type, object obj, SourceCodeSerializer serializer)
         {
-            return ParseExpression($"{obj.GetType().FullName}.{obj}");
+            return ParseExpression($"{serializer.GetTypeName(obj.GetType())}.{obj}");
         }
     }
 

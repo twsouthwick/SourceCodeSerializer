@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -133,6 +134,7 @@ partial class Factory
             }
         }
 
+
         [Fact]
         public void NestedObjectsWithClassAndUsings()
         {
@@ -176,6 +178,31 @@ partial class Factory
                 Assert.Equal(log.ToString(), expected);
             }
         }
+
+        [Fact]
+        public void EnumValues()
+        {
+            using (var log = new StringWriter())
+            {
+                var obj = new TestClass4
+                {
+                    Color = ConsoleColor.Red
+                };
+
+                var node = SourceCodeSerializer.Create()
+                    .AddTextWriter(log)
+                    .Serialize(obj);
+
+                _helper.WriteLine(log.ToString());
+
+                var expected = @"new RoslynSerializer.TestClass4
+{
+    Color = ConsoleColor.Red
+}";
+
+                Assert.Equal(log.ToString(), expected);
+            }
+        }
     }
 
     public class TestClass1
@@ -193,5 +220,10 @@ partial class Factory
         public TestClass1 Class1 { get; set; }
 
         public TestClass2 Class2 { get; set; }
+    }
+
+    public class TestClass4
+    {
+        public ConsoleColor Color { get; set; }
     }
 }
