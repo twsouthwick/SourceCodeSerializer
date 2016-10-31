@@ -264,6 +264,46 @@ partial class Factory
             }
         }
 
+
+        [Fact]
+        public void GenericList2()
+        {
+            using (var log = new StringWriter())
+            {
+                var obj = new GenericList2
+                {
+                    List = new TestClass2[]
+                    {
+                        new TestClass2 { Test = "Item1" },
+                        new TestClass2 { Test = "Item2" }
+                    }
+                };
+
+                var node = SourceCodeSerializer.Create()
+                    .AddTextWriter(log)
+                    .AddUsing("RoslynSerializer")
+                    .Serialize(obj);
+
+                _helper.WriteLine(log.ToString());
+
+                var expected = @"new GenericList2
+{
+    List = new TestClass2[] {
+        new TestClass2
+        {
+            Test = ""Item1""
+        },
+        new TestClass2
+        {
+            Test = ""Item2""
+        }
+    }
+}";
+
+                Assert.Equal(log.ToString(), expected);
+            }
+        }
+
         [Fact]
         public void NonGenericList()
         {
@@ -329,6 +369,11 @@ partial class Factory
     public class GenericList1
     {
         public IList<TestClass2> List { get; set; }
+    }
+
+    public class GenericList2
+    {
+        public TestClass2[] List { get; set; }
     }
 
     public class NonGenericList1

@@ -28,6 +28,11 @@ namespace RoslynSerializer.Converters
 
         private Type GetGenericParameter(Type type)
         {
+            if (type.GetTypeInfo().IsArray)
+            {
+                return type.GetTypeInfo().GetElementType();
+            }
+
             if (!type.GetTypeInfo().IsGenericType)
             {
                 return typeof(object);
