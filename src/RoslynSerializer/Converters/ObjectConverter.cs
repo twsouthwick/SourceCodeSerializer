@@ -34,9 +34,7 @@ namespace RoslynSerializer.Converters
                 }
             }).Where(prop => prop != null);
 
-            var typeName = IdentifierName(serializer.GetTypeName(obj.GetType()));
-
-            return ObjectCreationExpression(typeName)
+            return ObjectCreationExpression(serializer.GetTypeName(obj.GetType()))
                      .WithInitializer(
                        InitializerExpression(SyntaxKind.ObjectInitializerExpression, SeparatedList<ExpressionSyntax>(propertyNodes)));
         }

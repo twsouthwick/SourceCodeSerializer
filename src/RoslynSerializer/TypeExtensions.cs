@@ -3,7 +3,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
-
+using System.Linq;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace RoslynSerializer
@@ -30,7 +30,7 @@ namespace RoslynSerializer
             { typeof(object), SyntaxKind.ObjectKeyword }
         };
 
-        public static TypeSyntax GetSyntaxNode(this Type type)
+        public static TypeSyntax GetSyntaxNode(this Type type, IEnumerable<string> usings)
         {
             SyntaxKind kind;
             if (s_syntaxKinds.TryGetValue(type, out kind))
@@ -38,7 +38,18 @@ namespace RoslynSerializer
                 return PredefinedType(Token(kind));
             }
 
-            return ParseTypeName(type.FullName);
+            var fullName = type.FullName;
+
+            foreach (var u in usings)
+            {
+                var up = $"{u}.";
+                if (fullName.StartsWith(up, StringComparison.Ordinal))
+                {
+                    return ParseTypeName(fullName.Substring(up.Length));
+                }
+            }
+
+            return ParseTypeName(fullName);
         }
     }
 }

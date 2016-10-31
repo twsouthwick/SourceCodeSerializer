@@ -16,13 +16,26 @@ namespace RoslynSerializer.Converters
 
         public override ExpressionSyntax ConvertSyntax(Type type, IEnumerable collection, SourceCodeSerializer serializer)
         {
+            var arrayType = GetGenericParameter(type);
             var generic = collection.Cast<object>();
 
             var items = generic.Select(item => serializer.WriteValue(item).WithLeadingTrivia(TriviaList(LineFeed)));
 
             return ArrayCreationExpression(
-                ArrayType(ParseTypeName(serializer.GetTypeName(type)), SingletonList(ArrayRankSpecifier(SingletonSeparatedList<ExpressionSyntax>(OmittedArraySizeExpression())))))
+                ArrayType(serializer.GetTypeName(arrayType), SingletonList(ArrayRankSpecifier(SingletonSeparatedList<ExpressionSyntax>(OmittedArraySizeExpression())))))
                 .WithInitializer(InitializerExpression(SyntaxKind.ArrayInitializerExpression, SeparatedList(items)));
+        }
+
+        private Type GetGenericParameter(Type type)
+        {
+            if (!type.GetTypeInfo().IsGenericType)
+            {
+                return typeof(object);
+            }
+
+            var genericArgs = type.GetTypeInfo().GenericTypeArguments;
+
+            return genericArgs[0];
         }
     }
 }

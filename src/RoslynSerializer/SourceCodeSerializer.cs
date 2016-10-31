@@ -73,20 +73,9 @@ namespace RoslynSerializer
             return node;
         }
 
-        public string GetTypeName(Type type)
+        public TypeSyntax GetTypeName(Type type)
         {
-            var fullName = type.FullName;
-
-            foreach (var u in _usings)
-            {
-                var up = $"{u}.";
-                if (fullName.StartsWith(up, StringComparison.Ordinal))
-                {
-                    return fullName.Substring(up.Length);
-                }
-            }
-
-            return fullName;
+            return type.GetSyntaxNode(_usings);
         }
 
         private SyntaxNode AddCreateMethod(ExpressionSyntax node, Type type)
@@ -105,7 +94,7 @@ namespace RoslynSerializer
                         ClassDeclaration(_createMethodInfo.ClassName)
                         .WithModifiers(TokenList(Token(SyntaxKind.PartialKeyword)))
                         .WithMembers(SingletonList<MemberDeclarationSyntax>(
-                                MethodDeclaration(ParseTypeName(GetTypeName(type)), Identifier(_createMethodInfo.MethodName))
+                                MethodDeclaration(GetTypeName(type), Identifier(_createMethodInfo.MethodName))
                                 .WithModifiers(TokenList(Token(SyntaxKind.PublicKeyword)))
                                 .WithBody(Block(SingletonList<StatementSyntax>(ReturnStatement(node))))
                         ))

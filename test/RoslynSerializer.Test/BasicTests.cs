@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.IO;
 using Xunit;
 using Xunit.Abstractions;
@@ -203,6 +205,83 @@ partial class Factory
                 Assert.Equal(log.ToString(), expected);
             }
         }
+
+        [Fact]
+        public void GenericList()
+        {
+            using (var log = new StringWriter())
+            {
+                var obj = new GenericList1
+                {
+                    List = new List<TestClass2>()
+                };
+
+                obj.List.Add(new TestClass2 { Test = "Item1" });
+                obj.List.Add(new TestClass2 { Test = "Item2" });
+
+                var node = SourceCodeSerializer.Create()
+                    .AddTextWriter(log)
+                    .AddUsing("RoslynSerializer")
+                    .Serialize(obj);
+
+                _helper.WriteLine(log.ToString());
+
+                var expected = @"new GenericList1
+{
+    List = new TestClass2[] {
+        new TestClass2
+        {
+            Test = ""Item1""
+        },
+        new TestClass2
+        {
+            Test = ""Item2""
+        }
+    }
+}";
+
+                Assert.Equal(log.ToString(), expected);
+            }
+        }
+
+        [Fact]
+        public void NonGenericList()
+        {
+            using (var log = new StringWriter())
+            {
+                var obj = new NonGenericList1
+                {
+                    List = new object[]
+                    {
+                        new TestClass1 { Test = 2 },
+                        new TestClass2 { Test = "Item2" }
+                    }
+                };
+
+                var node = SourceCodeSerializer.Create()
+                    .AddTextWriter(log)
+                    .AddUsing("RoslynSerializer")
+                    .Serialize(obj);
+
+                _helper.WriteLine(log.ToString());
+
+                var expected = @"new NonGenericList1
+{
+    List = new object[] {
+        new TestClass1
+        {
+            Test = 2
+        },
+        new TestClass2
+        {
+            Test = ""Item2""
+        }
+    }
+}";
+
+                Assert.Equal(log.ToString(), expected);
+            }
+        }
     }
 
     public class TestClass1
@@ -225,5 +304,15 @@ partial class Factory
     public class TestClass4
     {
         public ConsoleColor Color { get; set; }
+    }
+
+    public class GenericList1
+    {
+        public IList<TestClass2> List { get; set; }
+    }
+
+    public class NonGenericList1
+    {
+        public IList List { get; set; }
     }
 }
