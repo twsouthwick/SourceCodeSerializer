@@ -3,12 +3,8 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Formatting;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Formatting;
-using System;
-using System.Collections;
-using System.Collections.Generic;
+using RoslynSerializer.Converters;
 using System.IO;
-using System.Linq;
-using System.Reflection;
 
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
@@ -16,9 +12,22 @@ namespace RoslynSerializer
 {
     public class SourceCodeSerializer
     {
+        private static ExpressionConverter[] s_converters = new ExpressionConverter[]
+        {
+            new PrimitiveConverter(),
+            new StringConverter(),
+            new EnumConverter(),
+            new DateTimeConverter(),
+            new DateTimeOffsetConverter(),
+            new DecimalConverter(),
+            new UnknownValueTypeConverter(),
+            new EnumerableConverter(),
+            new ObjectConverter()
+        };
+
         public ExpressionSyntax Serialize<T>(T obj)
         {
-            return WriteObject(obj);
+            return WriteValue(obj);
         }
 
         public void Serialize<T>(TextWriter writer, T obj)
@@ -78,144 +87,17 @@ namespace RoslynSerializer
                 return ParseExpression("null");
             }
 
-            if (obj.GetType().GetTypeInfo().IsEnum)
+            var type = obj.GetType();
+
+            foreach (var converter in s_converters)
             {
-                return ParseExpression($"{obj.GetType().FullName}.{obj}");
-            }
-
-            ExpressionSyntax result;
-            if (TryWrite(obj as IEnumerable, out result))
-            {
-                return result;
-            }
-
-            if (obj.GetType().GetTypeInfo().IsPrimitive)
-            {
-                return ParseExpression(obj.ToString());
-            }
-
-            if (obj.GetType() == typeof(string))
-            {
-                return ParseExpression($"\"{obj as string}\"");
-            }
-
-            if (obj.GetType() == typeof(DateTime))
-            {
-                var dt = (DateTime)obj;
-
-                return ParseExpression($"new DateTime({dt.Ticks}))");
-            }
-
-            if (obj.GetType() == typeof(DateTimeOffset))
-            {
-                var dt = (DateTimeOffset)obj;
-
-                return ParseExpression($"new DateTimeOffset({dt.Ticks}, new TimeSpan({dt.Offset.Ticks}))");
-            }
-
-            if (obj.GetType() == typeof(decimal))
-            {
-                return ParseExpression(obj.ToString());
-            }
-
-            if (obj.GetType().GetTypeInfo().IsValueType)
-            {
-                if (unknownTypes.Add(obj.GetType()))
+                if (converter.CanConvert(type))
                 {
-                    Console.WriteLine("Unknown type: {0}", obj.GetType());
+                    return converter.ConvertSyntax(type, obj, this);
                 }
-
-                return ParseExpression("new object()");
             }
 
-            return WriteObject(obj);
-        }
-
-        private HashSet<Type> unknownTypes = new HashSet<Type>();
-
-        public ExpressionSyntax WriteObject(object obj)
-        {
-            var properties = GetProperties(obj.GetType());
-
-            var propertyNodes = properties.Select(property =>
-            {
-                try
-                {
-                    var value = property.GetValue(obj);
-                    var expression = WriteValue(value);
-
-                    return AssignmentExpression(SyntaxKind.SimpleAssignmentExpression, IdentifierName(property.Name), expression);
-                    //.WithLeadingTrivia(TriviaList(LineFeed));
-                }
-                catch (Exception)
-                {
-                    return null;
-                }
-            }).Where(prop => prop != null);
-
-            var typeName = IdentifierName(obj.GetType().ToString());
-
-            return ObjectCreationExpression(typeName)
-                     .WithInitializer(
-                       InitializerExpression(SyntaxKind.ObjectInitializerExpression, SeparatedList<ExpressionSyntax>(propertyNodes)));
-        }
-
-        private bool TryWrite(IEnumerable collection, out ExpressionSyntax node)
-        {
-            if (collection == null)
-            {
-                node = null;
-                return false;
-            }
-
-            var generic = LinqHelper(collection);
-
-            // TODO: Get type instead of assuming same type as first element
-            var type = generic.First().GetType();
-            var items = generic.Select(item => WriteValue(item).WithLeadingTrivia(TriviaList(LineFeed)));
-
-            node = ArrayCreationExpression(
-                ArrayType(ParseTypeName(type.FullName), SingletonList<ArrayRankSpecifierSyntax>(
-                                                        ArrayRankSpecifier(
-                                                            SingletonSeparatedList<ExpressionSyntax>(
-                                                                OmittedArraySizeExpression())))))
-                .WithInitializer(
-                    InitializerExpression(
-                        SyntaxKind.ArrayInitializerExpression,
-                        SeparatedList(items)));
-            return true;
-        }
-
-        private IEnumerable<PropertyInfo> GetProperties(Type type)
-        {
-            return new HashSet<PropertyInfo>(type.GetTypeInfo().DeclaredProperties).Where(prop =>
-            {
-                if (!prop.CanRead || !prop.CanWrite)
-                {
-                    return false;
-                }
-
-                if (prop.SetMethod.IsPublic && prop.GetMethod.IsPublic)
-                {
-                    return true;
-                }
-
-                // Skip index parameters for now
-                if (prop.GetIndexParameters().Length == 0)
-                {
-                    return false;
-                }
-
-                return prop.CustomAttributes.Any(attr => string.Equals("IncludeAttribute", attr.AttributeType.Name, StringComparison.Ordinal));
-            }).OrderBy(prop => prop.Name).ToList();
-        }
-
-        private IEnumerable<object> LinqHelper(IEnumerable e)
-        {
-            foreach (var item in e)
-            {
-                yield return e;
-            }
+            throw new UnknownTypeException(type);
         }
     }
 }
