@@ -4,8 +4,10 @@ using Microsoft.CodeAnalysis.CSharp.Formatting;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Formatting;
 using RoslynSerializer.Converters;
+using System;
+using System.Collections.Immutable;
 using System.IO;
-
+using System.Linq;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace RoslynSerializer
@@ -25,48 +27,73 @@ namespace RoslynSerializer
             new ObjectConverter()
         };
 
-        public ExpressionSyntax Serialize<T>(T obj)
+        private readonly ImmutableList<string> _usings;
+        private readonly TextWriter _textWriter;
+        private readonly CreateMethodInfo _createMethodInfo;
+
+        private SourceCodeSerializer(TextWriter writer, CreateMethodInfo createMethodInfo, ImmutableList<string> usings)
         {
-            return WriteValue(obj);
+            _textWriter = writer;
+            _createMethodInfo = createMethodInfo;
+            _usings = usings;
         }
 
-        public void Serialize<T>(TextWriter writer, T obj)
+        public static SourceCodeSerializer Create()
         {
-            var node = Serialize(obj);
-
-            Serialize(writer, node);
+            return new SourceCodeSerializer(null, null, ImmutableList.Create<string>("System"));
         }
 
-        public void Serialize(TextWriter writer, ExpressionSyntax node)
+        public SourceCodeSerializer AddTextWriter(TextWriter writer)
         {
-            var cu = CompilationUnit()
-                  .WithMembers(
-                      SingletonList<MemberDeclarationSyntax>(
-                          ClassDeclaration("C")
-                          .WithMembers(
-                              SingletonList<MemberDeclarationSyntax>(
-                                  MethodDeclaration(
-                                      PredefinedType(
-                                          Token(SyntaxKind.VoidKeyword)),
-                                      Identifier("Test"))
-                                  .WithModifiers(
-                                      TokenList(
-                                          Token(SyntaxKind.PublicKeyword)))
-                                  .WithBody(
-                                      Block(SingletonList<StatementSyntax>(
-                                          ExpressionStatement(
-                                              AssignmentExpression(
-                                                  SyntaxKind.SimpleAssignmentExpression,
-                                                  IdentifierName("value"),
-                                                  node)
-                                              )
-                                          )
-                                      )
-                                  )
-                              )
-                          )
-                      )
-                  );
+            return new SourceCodeSerializer(writer, _createMethodInfo, _usings);
+        }
+
+        public SourceCodeSerializer AddCreateMethod(string className, string methodName = "Create")
+        {
+            var createMethodInfo = new CreateMethodInfo
+            {
+                ClassName = className,
+                MethodName = methodName
+            };
+
+            return new SourceCodeSerializer(_textWriter, createMethodInfo, _usings);
+        }
+
+        public SyntaxNode Serialize<T>(T obj)
+        {
+            var node = Format(WriteValue(obj), typeof(T));
+
+            Write(node);
+
+            return node;
+        }
+
+        private SyntaxNode AddCreateMethod(ExpressionSyntax node, Type type)
+        {
+            if (_createMethodInfo == null)
+            {
+                return node;
+            }
+
+            var usings = _usings.Select(@using => UsingDirective(IdentifierName(@using)));
+
+            return CompilationUnit()
+                .WithUsings(List(usings))
+                .WithMembers(
+                    SingletonList<MemberDeclarationSyntax>(
+                        ClassDeclaration(_createMethodInfo.ClassName)
+                        .WithModifiers(TokenList(Token(SyntaxKind.PartialKeyword)))
+                        .WithMembers(SingletonList<MemberDeclarationSyntax>(
+                                MethodDeclaration(type.GetSyntaxNode(), Identifier(_createMethodInfo.MethodName))
+                                .WithModifiers(TokenList(Token(SyntaxKind.PublicKeyword)))
+                                .WithBody(Block(SingletonList<StatementSyntax>(ReturnStatement(node))))
+                        ))
+                ));
+        }
+
+        private SyntaxNode Format(ExpressionSyntax node, Type type)
+        {
+            var cu = AddCreateMethod(node, type);
 
             using (var ws = new AdhocWorkspace())
             {
@@ -74,17 +101,25 @@ namespace RoslynSerializer
                     .WithChangedOption(CSharpFormattingOptions.NewLineForMembersInObjectInit, true)
                     .WithChangedOption(CSharpFormattingOptions.NewLinesForBracesInObjectCollectionArrayInitializers, true);
 
-                var result = Formatter.Format(cu, ws, ws.Options);
-
-                result.WriteTo(writer);
+                return Formatter.Format(cu, ws, ws.Options);
             }
+        }
+
+        private void Write(SyntaxNode node)
+        {
+            if (_textWriter == null)
+            {
+                return;
+            }
+
+            node.WriteTo(_textWriter);
         }
 
         public ExpressionSyntax WriteValue(object obj)
         {
             if (obj == null)
             {
-                return ParseExpression("null");
+                ParseExpression("null");
             }
 
             var type = obj.GetType();
@@ -98,6 +133,12 @@ namespace RoslynSerializer
             }
 
             throw new UnknownTypeException(type);
+        }
+
+        private class CreateMethodInfo
+        {
+            public string ClassName { get; set; }
+            public string MethodName { get; set; }
         }
     }
 }

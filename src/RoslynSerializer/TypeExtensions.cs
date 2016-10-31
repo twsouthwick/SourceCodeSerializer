@@ -30,34 +30,15 @@ namespace RoslynSerializer
             { typeof(object), SyntaxKind.ObjectKeyword }
         };
 
-        public static SyntaxKind GetSyntaxKind(this Type type)
+        public static TypeSyntax GetSyntaxNode(this Type type)
         {
             SyntaxKind kind;
             if (s_syntaxKinds.TryGetValue(type, out kind))
             {
-                return kind;
+                return PredefinedType(Token(kind));
             }
 
-            throw new ArgumentOutOfRangeException(nameof(type), type, "Unknown type");
-        }
-
-        public static PropertyDeclarationSyntax CompleteProperty(this PropertyDeclarationSyntax node)
-        {
-            return node.WithModifiers(
-                      TokenList(
-                          Token(SyntaxKind.PublicKeyword)))
-                  .WithAccessorList(
-                      AccessorList(
-                          List(new AccessorDeclarationSyntax[]{
-                                AccessorDeclaration(
-                                    SyntaxKind.GetAccessorDeclaration)
-                                .WithSemicolonToken(
-                                    Token(SyntaxKind.SemicolonToken)),
-                                AccessorDeclaration(
-                                    SyntaxKind.SetAccessorDeclaration)
-                                .WithSemicolonToken(
-                                    Token(SyntaxKind.SemicolonToken))})));
-
+            return ParseTypeName(type.FullName);
         }
     }
 }
