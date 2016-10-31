@@ -31,21 +31,24 @@ namespace RoslynSerializer
         private readonly TextWriter _textWriter;
         private readonly CreateMethodInfo _createMethodInfo;
 
-        private SourceCodeSerializer(TextWriter writer, CreateMethodInfo createMethodInfo, ImmutableList<string> usings)
+        public SerializerSettings Settings { get; }
+
+        private SourceCodeSerializer(TextWriter writer, CreateMethodInfo createMethodInfo, ImmutableList<string> usings, SerializerSettings settings)
         {
             _textWriter = writer;
             _createMethodInfo = createMethodInfo;
             _usings = usings;
+            Settings = settings;
         }
 
         public static SourceCodeSerializer Create()
         {
-            return new SourceCodeSerializer(null, null, ImmutableList.Create<string>("System"));
+            return new SourceCodeSerializer(null, null, ImmutableList.Create<string>("System"), SerializerSettings.Create());
         }
 
         public SourceCodeSerializer AddTextWriter(TextWriter writer)
         {
-            return new SourceCodeSerializer(writer, _createMethodInfo, _usings);
+            return new SourceCodeSerializer(writer, _createMethodInfo, _usings, Settings);
         }
 
         public SourceCodeSerializer AddCreateMethod(string className, string methodName = "Create")
@@ -56,12 +59,17 @@ namespace RoslynSerializer
                 MethodName = methodName
             };
 
-            return new SourceCodeSerializer(_textWriter, createMethodInfo, _usings);
+            return new SourceCodeSerializer(_textWriter, createMethodInfo, _usings, Settings);
         }
 
         public SourceCodeSerializer AddUsing(string @using)
         {
-            return new SourceCodeSerializer(_textWriter, _createMethodInfo, _usings.Add(@using));
+            return new SourceCodeSerializer(_textWriter, _createMethodInfo, _usings.Add(@using), Settings);
+        }
+
+        public SourceCodeSerializer WithSettings(SerializerSettings settings)
+        {
+            return new SourceCodeSerializer(_textWriter, _createMethodInfo, _usings, settings);
         }
 
         public SyntaxNode Serialize<T>(T obj)
@@ -107,11 +115,7 @@ namespace RoslynSerializer
 
             using (var ws = new AdhocWorkspace())
             {
-                ws.Options = ws.Options
-                    .WithChangedOption(CSharpFormattingOptions.NewLineForMembersInObjectInit, true)
-                    .WithChangedOption(CSharpFormattingOptions.NewLinesForBracesInObjectCollectionArrayInitializers, true);
-
-                return Formatter.Format(cu, ws, ws.Options);
+                return Formatter.Format(cu, ws);
             }
         }
 
