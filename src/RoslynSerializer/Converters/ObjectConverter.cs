@@ -48,31 +48,66 @@ namespace RoslynSerializer.Converters
 
         protected virtual bool IncludeProperty(PropertyInfo prop)
         {
-            return prop.CustomAttributes.Any(attr => string.Equals("IncludeAttribute", attr.AttributeType.Name, StringComparison.Ordinal));
+            // Skip index parameters for now
+            if (prop.GetIndexParameters().Length != 0)
+            {
+                return false;
+            }
+
+            if (prop.CustomAttributes.Any(attr => string.Equals("IncludeAttribute", attr.AttributeType.Name, StringComparison.Ordinal)))
+            {
+                return true;
+            }
+
+            if (!prop.CanRead || !prop.CanWrite)
+            {
+                return false;
+            }
+
+            if (prop.SetMethod.IsPublic && prop.GetMethod.IsPublic)
+            {
+                return true;
+            }
+
+            return false;
         }
 
         private IEnumerable<PropertyInfo> GetProperties(Type type)
         {
-            return new HashSet<PropertyInfo>(type.GetTypeInfo().DeclaredProperties).Where(prop =>
+            var result = new SortedSet<PropertyInfo>(PropertyInfoComparer.Instance);
+
+            FillProperties(type, result);
+
+            return result;
+        }
+
+        private void FillProperties(Type type, SortedSet<PropertyInfo> set)
+        {
+            if (type == typeof(object))
             {
-                if (!prop.CanRead || !prop.CanWrite)
-                {
-                    return false;
-                }
+                return;
+            }
 
-                if (prop.SetMethod.IsPublic && prop.GetMethod.IsPublic)
-                {
-                    return true;
-                }
+            foreach (var property in type.GetTypeInfo().DeclaredProperties.Where(IncludeProperty))
+            {
+                set.Add(property);
+            }
 
-                // Skip index parameters for now
-                if (prop.GetIndexParameters().Length == 0)
-                {
-                    return false;
-                }
+            FillProperties(type.GetTypeInfo().BaseType, set);
+        }
 
-                return IncludeProperty(prop);
-            }).OrderBy(prop => prop.Name);
+        private class PropertyInfoComparer : IComparer<PropertyInfo>
+        {
+            public static IComparer<PropertyInfo> Instance { get; } = new PropertyInfoComparer();
+
+            private PropertyInfoComparer()
+            {
+            }
+
+            public int Compare(PropertyInfo x, PropertyInfo y)
+            {
+                return StringComparer.Ordinal.Compare(x?.Name, y?.Name);
+            }
         }
     }
 }

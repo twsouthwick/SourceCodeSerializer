@@ -342,6 +342,34 @@ partial class Factory
                 Assert.Equal(log.ToString(), expected);
             }
         }
+
+        [Fact]
+        public void DerivedMembers()
+        {
+            using (var log = new StringWriter())
+            {
+                var obj = new DerivedTest1
+                {
+                    Other = 1,
+                    Test = 6
+                };
+
+                var node = SourceCodeSerializer.Create()
+                    .AddTextWriter(log)
+                    .AddUsing("RoslynSerializer")
+                    .Serialize(obj);
+
+                _helper.WriteLine(log.ToString());
+
+                var expected = @"new DerivedTest1
+{
+    Other = 1,
+    Test = 6
+}";
+
+                Assert.Equal(log.ToString(), expected);
+            }
+        }
     }
 
     public class TestClass1
@@ -379,5 +407,10 @@ partial class Factory
     public class NonGenericList1
     {
         public IList List { get; set; }
+    }
+
+    public class DerivedTest1 : TestClass1
+    {
+        public int Other { get; set; }
     }
 }
