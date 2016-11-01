@@ -173,12 +173,12 @@ namespace RoslynSerializer
 
         public ExpressionSyntax WriteValue(object obj)
         {
-            if (obj == null)
-            {
-                ParseExpression("null");
-            }
+            var type = obj?.GetType();
 
-            var type = obj.GetType();
+            if (type.GetDefault()?.Equals(obj) == true)
+            {
+                return null;
+            }
 
             foreach (var converter in s_converters)
             {

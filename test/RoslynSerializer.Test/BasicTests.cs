@@ -41,6 +41,25 @@ namespace RoslynSerializer
         }
 
         [Fact]
+        public void IntegerPropertyDefaultValue()
+        {
+            using (var log = new StringWriter())
+            {
+                var obj = new TestClass1 { Test = 0 };
+
+                var node = SourceCodeSerializer.Create()
+                    .AddTextWriter(log)
+                    .Serialize(obj);
+
+                _helper.WriteLine(log.ToString());
+
+                var expected = @"new RoslynSerializer.TestClass1 { }";
+
+                Assert.Equal(expected, log.ToString());
+            }
+        }
+
+        [Fact]
         public void IntegerPropertyNoNewLine()
         {
             using (var log = new StringWriter())

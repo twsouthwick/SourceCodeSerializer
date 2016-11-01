@@ -3,7 +3,8 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
-using System.Linq;
+using System.Reflection;
+
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace RoslynSerializer
@@ -50,6 +51,23 @@ namespace RoslynSerializer
             }
 
             return ParseTypeName(fullName);
+        }
+
+        public static object GetDefault(this Type targetType)
+        {
+            if (targetType?.GetTypeInfo().IsValueType == false)
+            {
+                return null;
+            }
+
+            return typeof(TypeExtensions).GetTypeInfo().GetDeclaredMethod(nameof(ToDefaultHelper))
+                .MakeGenericMethod(targetType)
+                .Invoke(null, null);
+        }
+
+        private static T ToDefaultHelper<T>()
+        {
+            return default(T);
         }
     }
 }
