@@ -127,35 +127,37 @@ namespace RoslynSerializer
 
                 var node = SourceCodeSerializer.Create()
                     .AddTextWriter(log)
-                    .AddCreateMethod("Factory")
+                    .AddCreateMethod("Test", "Factory")
                     .Serialize(obj);
 
                 _helper.WriteLine(log.ToString());
 
                 var expected = @"using System;
 
-partial class Factory
+namespace Test
 {
-    public RoslynSerializer.TestClass3 Create()
+    partial class Factory
     {
-        return new RoslynSerializer.TestClass3
+        public RoslynSerializer.TestClass3 Create()
         {
-            Class1 = new RoslynSerializer.TestClass1
+            return new RoslynSerializer.TestClass3
             {
-                Test = 6
-            },
-            Class2 = new RoslynSerializer.TestClass2
-            {
-                Test = @""Hello world""
-            }
-        };
+                Class1 = new RoslynSerializer.TestClass1
+                {
+                    Test = 6
+                },
+                Class2 = new RoslynSerializer.TestClass2
+                {
+                    Test = @""Hello world""
+                }
+            };
+        }
     }
 }";
 
                 Assert.Equal(log.ToString(), expected);
             }
         }
-
 
         [Fact]
         public void NestedObjectsWithClassAndUsings()
@@ -170,7 +172,7 @@ partial class Factory
 
                 var node = SourceCodeSerializer.Create()
                     .AddTextWriter(log)
-                    .AddCreateMethod("Factory")
+                    .AddCreateMethod("Test", "Factory")
                     .AddUsing("RoslynSerializer")
                     .Serialize(obj);
 
@@ -179,21 +181,69 @@ partial class Factory
                 var expected = @"using System;
 using RoslynSerializer;
 
-partial class Factory
+namespace Test
 {
-    public TestClass3 Create()
+    partial class Factory
     {
-        return new TestClass3
+        public TestClass3 Create()
+        {
+            return new TestClass3
+            {
+                Class1 = new TestClass1
+                {
+                    Test = 6
+                },
+                Class2 = new TestClass2
+                {
+                    Test = @""Hello world""
+                }
+            };
+        }
+    }
+}";
+
+                Assert.Equal(log.ToString(), expected);
+            }
+        }
+
+
+        [Fact]
+        public void NestedObjectsWithConstructorAndUsings()
+        {
+            using (var log = new StringWriter())
+            {
+                var obj = new TestClass3
+                {
+                    Class1 = new TestClass1 { Test = 6 },
+                    Class2 = new TestClass2 { Test = "Hello world" }
+                };
+
+                var node = SourceCodeSerializer.Create()
+                    .AddTextWriter(log)
+                    .AddConstructor("Test", "Factory")
+                    .AddUsing("RoslynSerializer")
+                    .Serialize(obj);
+
+                _helper.WriteLine(log.ToString());
+
+                var expected = @"using System;
+using RoslynSerializer;
+
+namespace Test
+{
+    partial class Factory
+    {
+        public Factory()
         {
             Class1 = new TestClass1
             {
                 Test = 6
-            },
+            };
             Class2 = new TestClass2
             {
                 Test = @""Hello world""
-            }
-        };
+            };
+        }
     }
 }";
 

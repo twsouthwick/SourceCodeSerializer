@@ -5,6 +5,7 @@ using Microsoft.CodeAnalysis.Formatting;
 using RoslynSerializer.Converters;
 using System;
 using System.Collections.Immutable;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 
@@ -51,12 +52,27 @@ namespace RoslynSerializer
             return new SourceCodeSerializer(writer, _createMethodInfo, _usings, Settings);
         }
 
-        public SourceCodeSerializer AddCreateMethod(string className, string methodName = "Create")
+        public SourceCodeSerializer AddConstructor(string ns, string className)
         {
             var createMethodInfo = new CreateMethodInfo
             {
+                Namespace = ns,
                 ClassName = className,
-                MethodName = methodName
+                MethodName = className,
+                IsConstructor = true
+            };
+
+            return new SourceCodeSerializer(_textWriter, createMethodInfo, _usings, Settings);
+        }
+
+        public SourceCodeSerializer AddCreateMethod(string ns, string className, string methodName = "Create")
+        {
+            var createMethodInfo = new CreateMethodInfo
+            {
+                Namespace = ns,
+                ClassName = className,
+                MethodName = methodName,
+                IsConstructor = false
             };
 
             return new SourceCodeSerializer(_textWriter, createMethodInfo, _usings, Settings);
@@ -86,6 +102,32 @@ namespace RoslynSerializer
             return type.GetSyntaxNode(_usings);
         }
 
+        private SyntaxNode GetMember(ExpressionSyntax node, Type type)
+        {
+            if (_createMethodInfo.IsConstructor)
+            {
+                var obj = node as ObjectCreationExpressionSyntax;
+                if (obj != null)
+                {
+                    return ConstructorDeclaration(_createMethodInfo.MethodName)
+                        .WithModifiers(TokenList(Token(SyntaxKind.PublicKeyword)))
+                        .WithBody(Block(SeparatedList(obj.Initializer.Expressions.Select(ExpressionStatement))));
+                }
+                else
+                {
+                    Debug.Fail($"Unknown kind: {node.Kind()}");
+
+                    return node;
+                }
+            }
+            else
+            {
+                return MethodDeclaration(GetTypeName(type), Identifier(_createMethodInfo.MethodName))
+                    .WithModifiers(TokenList(Token(SyntaxKind.PublicKeyword)))
+                    .WithBody(Block(SingletonList<StatementSyntax>(ReturnStatement(node))));
+            }
+        }
+
         private SyntaxNode AddCreateMethod(ExpressionSyntax node, Type type)
         {
             if (_createMethodInfo == null)
@@ -94,20 +136,20 @@ namespace RoslynSerializer
             }
 
             var usings = _usings.Select(@using => UsingDirective(IdentifierName(@using)));
+            var member = GetMember(node, type);
 
             return CompilationUnit()
                 .WithUsings(List(usings))
                 .WithMembers(
-                    SingletonList<MemberDeclarationSyntax>(
-                        ClassDeclaration(_createMethodInfo.ClassName)
-                        .WithModifiers(TokenList(Token(SyntaxKind.PartialKeyword)))
-                        .WithMembers(SingletonList<MemberDeclarationSyntax>(
-                                MethodDeclaration(GetTypeName(type), Identifier(_createMethodInfo.MethodName))
-                                .WithModifiers(TokenList(Token(SyntaxKind.PublicKeyword)))
-                                .WithBody(Block(SingletonList<StatementSyntax>(ReturnStatement(node))))
-                        ))
-                ));
+                    SingletonList<MemberDeclarationSyntax>(NamespaceDeclaration(IdentifierName(_createMethodInfo.Namespace))
+                    .WithMembers(
+                        SingletonList<MemberDeclarationSyntax>(
+                            ClassDeclaration(_createMethodInfo.ClassName)
+                            .WithModifiers(TokenList(Token(SyntaxKind.PartialKeyword)))
+                            .WithMembers(SingletonList(member))
+                ))));
         }
+
 
         private SyntaxNode Format(ExpressionSyntax node, Type type)
         {
@@ -151,8 +193,10 @@ namespace RoslynSerializer
 
         private class CreateMethodInfo
         {
+            public string Namespace { get; set; }
             public string ClassName { get; set; }
             public string MethodName { get; set; }
+            public bool IsConstructor { get; set; }
         }
     }
 }
