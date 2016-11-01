@@ -74,7 +74,7 @@ namespace RoslynSerializer
 
                 var expected = @"new RoslynSerializer.TestClass2
 {
-    Test = ""Hello world""
+    Test = @""Hello world""
 }";
 
                 Assert.Equal(log.ToString(), expected);
@@ -106,7 +106,7 @@ namespace RoslynSerializer
     },
     Class2 = new RoslynSerializer.TestClass2
     {
-        Test = ""Hello world""
+        Test = @""Hello world""
     }
 }";
 
@@ -146,7 +146,7 @@ partial class Factory
             },
             Class2 = new RoslynSerializer.TestClass2
             {
-                Test = ""Hello world""
+                Test = @""Hello world""
             }
         };
     }
@@ -191,7 +191,7 @@ partial class Factory
             },
             Class2 = new TestClass2
             {
-                Test = ""Hello world""
+                Test = @""Hello world""
             }
         };
     }
@@ -251,11 +251,11 @@ partial class Factory
     List = new TestClass2[] {
         new TestClass2
         {
-            Test = ""Item1""
+            Test = @""Item1""
         },
         new TestClass2
         {
-            Test = ""Item2""
+            Test = @""Item2""
         }
     }
 }";
@@ -291,11 +291,11 @@ partial class Factory
     List = new TestClass2[] {
         new TestClass2
         {
-            Test = ""Item1""
+            Test = @""Item1""
         },
         new TestClass2
         {
-            Test = ""Item2""
+            Test = @""Item2""
         }
     }
 }";
@@ -334,7 +334,7 @@ partial class Factory
         },
         new TestClass2
         {
-            Test = ""Item2""
+            Test = @""Item2""
         }
     }
 }";

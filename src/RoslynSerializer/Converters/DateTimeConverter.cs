@@ -9,7 +9,7 @@ namespace RoslynSerializer.Converters
     {
         public override ExpressionSyntax ConvertSyntax(Type type, DateTime obj, SourceCodeSerializer serializer)
         {
-            return ParseExpression($"new DateTime({obj.Ticks}))");
+            return ParseExpression($"new DateTime({obj.Ticks})");
         }
     }
 }

@@ -9,7 +9,7 @@ namespace RoslynSerializer.Converters
     {
         public override ExpressionSyntax ConvertSyntax(Type type, decimal obj, SourceCodeSerializer serializer)
         {
-            return ParseExpression(obj.ToString());
+            return ParseExpression($"{obj}m");
         }
     }
 }

@@ -9,7 +9,7 @@ namespace RoslynSerializer.Converters
     {
         public override ExpressionSyntax ConvertSyntax(Type type, string obj, SourceCodeSerializer serializer)
         {
-            return ParseExpression($"\"{obj}\"");
+            return ParseExpression($"@\"{obj}\"");
         }
     }
 }
