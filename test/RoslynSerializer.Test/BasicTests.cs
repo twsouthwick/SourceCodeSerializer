@@ -441,6 +441,65 @@ namespace Test
             }
         }
 
+        [Fact]
+        public void IgnorablePropertyTest()
+        {
+            using (var log = new StringWriter())
+            {
+                var obj = new IgnorableProperty
+                {
+                    Field1 = 1,
+                    Field2 = 2,
+                    Field3 = 3,
+                };
+
+                var node = SourceCodeSerializer.Create()
+                    .AddTextWriter(log)
+                    .AddUsing("RoslynSerializer")
+                    .Serialize(obj);
+
+                _helper.WriteLine(log.ToString());
+
+                var expected = @"new IgnorableProperty
+{
+    Field1 = 1,
+    Field3 = 3
+}";
+
+                Assert.Equal(log.ToString(), expected);
+            }
+        }
+
+        [Fact]
+        public void IgnorableProperty2Test()
+        {
+            using (var log = new StringWriter())
+            {
+                var obj = new IgnorableProperty2
+                {
+                    Field1 = 1,
+                    Field2 = 2,
+                    Field3 = 3,
+                };
+
+                var node = SourceCodeSerializer.Create()
+                    .AddTextWriter(log)
+                    .AddUsing("RoslynSerializer")
+                    .Serialize(obj);
+
+                _helper.WriteLine(log.ToString());
+
+                var expected = @"new IgnorableProperty2
+{
+    Field1 = 1,
+    Field2 = 2,
+    Field3 = 3
+}";
+
+                Assert.Equal(log.ToString(), expected);
+            }
+        }
+
         [Theory]
         [InlineData(1.0d, "1d")]
         [InlineData(1.3d, "1.3d")]
@@ -495,5 +554,20 @@ namespace Test
     public class DerivedTest1 : TestClass1
     {
         public int Other { get; set; }
+    }
+
+    public class IgnoreAttribute : Attribute { }
+
+    public class IgnorableProperty
+    {
+        public virtual int Field1 { get; set; }
+        [Ignore]
+        public virtual int Field2 { get; set; }
+        public virtual int Field3 { get; set; }
+    }
+
+    public class IgnorableProperty2:IgnorableProperty
+    {
+        public override int Field2 { get; set; }
     }
 }

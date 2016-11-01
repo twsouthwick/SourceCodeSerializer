@@ -55,7 +55,7 @@ namespace RoslynSerializer
 
         public static object GetDefault(this Type targetType)
         {
-            if (targetType?.GetTypeInfo().IsValueType == false)
+            if (targetType == null || !targetType.GetTypeInfo().IsValueType)
             {
                 return null;
             }

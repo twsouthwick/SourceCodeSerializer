@@ -173,7 +173,12 @@ namespace RoslynSerializer
 
         public ExpressionSyntax WriteValue(object obj)
         {
-            var type = obj?.GetType();
+            if (obj == null)
+            {
+                return null;
+            }
+
+            var type = obj.GetType();
 
             if (type.GetDefault()?.Equals(obj) == true)
             {

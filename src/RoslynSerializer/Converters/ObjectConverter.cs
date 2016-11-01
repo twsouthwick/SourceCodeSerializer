@@ -20,24 +20,23 @@ namespace RoslynSerializer.Converters
 
             var propertyNodes = properties.Select(property =>
             {
-                try
-                {
-                    var value = property.GetValue(obj);
-                    var expression = serializer.WriteValue(value);
-                    var assignment = AssignmentExpression(SyntaxKind.SimpleAssignmentExpression, IdentifierName(property.Name), expression);
+                var value = property.GetValue(obj);
+                var expression = serializer.WriteValue(value);
 
-                    if (serializer.Settings.ObjectInitializationNewLine)
-                    {
-                        return assignment.WithLeadingTrivia(TriviaList(LineFeed));
-                    }
-                    else
-                    {
-                        return assignment;
-                    }
-                }
-                catch (Exception)
+                if (expression == null)
                 {
                     return null;
+                }
+
+                var assignment = AssignmentExpression(SyntaxKind.SimpleAssignmentExpression, IdentifierName(property.Name), expression);
+
+                if (serializer.Settings.ObjectInitializationNewLine)
+                {
+                    return assignment.WithLeadingTrivia(TriviaList(LineFeed));
+                }
+                else
+                {
+                    return assignment;
                 }
             }).Where(prop => prop != null);
 
@@ -57,6 +56,11 @@ namespace RoslynSerializer.Converters
             if (prop.CustomAttributes.Any(attr => string.Equals("IncludeAttribute", attr.AttributeType.Name, StringComparison.Ordinal)))
             {
                 return true;
+            }
+
+            if (prop.CustomAttributes.Any(attr => string.Equals("IgnoreAttribute", attr.AttributeType.Name, StringComparison.Ordinal)))
+            {
+                return false;
             }
 
             if (!prop.CanRead || !prop.CanWrite)
