@@ -21,13 +21,32 @@ namespace RoslynSerializer.Converters
 
         public override ExpressionSyntax ConvertSyntax(Type type, object obj, SourceCodeSerializer serializer)
         {
-            return ParseExpression($"{obj}{GetSuffix(type)}");
+            return CornerCases(type, obj) ?? ParseExpression($"{obj}{GetSuffix(type)}");
+        }
+
+        private ExpressionSyntax CornerCases(Type type, object obj)
+        {
+            if (type == typeof(double))
+            {
+                var d = (double)obj;
+
+                if (d == double.MinValue)
+                {
+                    return ParseExpression("double.MinValue");
+                }
+
+                if (d == double.MaxValue)
+                {
+                    return ParseExpression("double.MaxValue");
+                }
+            }
+            return null;
         }
 
         private string GetSuffix(Type type)
         {
             string result;
-            if(s_suffixMap.TryGetValue(type, out result))
+            if (s_suffixMap.TryGetValue(type, out result))
             {
                 return result;
             }
