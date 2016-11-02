@@ -1,4 +1,5 @@
 ﻿using RoslynSerializer.Converters;
+using RoslynSerializer.Generators;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -141,7 +142,7 @@ namespace RoslynSerializer
 
                 var settings = new SerializerSettings
                 {
-                    Generator = new FactoryMethod("Test", "Factory", "Create"),
+                    Generator = new FactoryMethodGenerator("Test", "Factory", "Create"),
                     Usings = new[] { "System" }
                 };
 
@@ -189,7 +190,7 @@ namespace Test
 
                 var settings = new SerializerSettings
                 {
-                    Generator = new FactoryMethod("Test", "Factory", "Create"),
+                    Generator = new FactoryMethodGenerator("Test", "Factory", "Create"),
                     Usings = new[] { "System", "RoslynSerializer" }
                 };
 
@@ -239,7 +240,7 @@ namespace Test
 
                 var settings = new SerializerSettings
                 {
-                    Generator = new Constructor("Test", "Factory"),
+                    Generator = new ConstructorGenerator("Test", "Factory"),
                     Usings = new[] { "System", "RoslynSerializer" }
                 };
 

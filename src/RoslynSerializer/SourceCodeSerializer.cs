@@ -1,15 +1,9 @@
 ﻿using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Formatting;
 using RoslynSerializer.Converters;
 using System;
-using System.Collections.Immutable;
-using System.Diagnostics;
 using System.IO;
-using System.Linq;
-
-using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace RoslynSerializer
 {
@@ -59,61 +53,10 @@ namespace RoslynSerializer
             return type.GetSyntaxNode(Settings.Usings);
         }
 
-        private SyntaxNode GetMember(ExpressionSyntax node, Type type)
-        {
-            var constructor = Settings.Generator as Constructor;
-            var factory = Settings.Generator as FactoryMethod;
-
-            if (constructor != null)
-            {
-                var obj = node as ObjectCreationExpressionSyntax;
-                if (obj != null)
-                {
-                    return ConstructorDeclaration(constructor.ClassName)
-                        .WithModifiers(TokenList(Token(SyntaxKind.PublicKeyword)))
-                        .WithBody(Block(SeparatedList(obj.Initializer.Expressions.Select(ExpressionStatement))));
-                }
-                else
-                {
-                    Debug.Fail($"Unknown kind: {node.Kind()}");
-
-                    return node;
-                }
-            }
-            else
-            {
-                return MethodDeclaration(GetTypeName(type), Identifier(factory.MethodName))
-                    .WithModifiers(TokenList(Token(SyntaxKind.PublicKeyword)))
-                    .WithBody(Block(SingletonList<StatementSyntax>(ReturnStatement(node))));
-            }
-        }
-
-        private SyntaxNode AddCreateMethod(ExpressionSyntax node, Type type)
-        {
-            if (Settings.Generator == null)
-            {
-                return node;
-            }
-
-            var usings = Settings.Usings.Select(@using => UsingDirective(IdentifierName(@using)));
-            var member = GetMember(node, type);
-
-            return CompilationUnit()
-                .WithUsings(List(usings))
-                .WithMembers(
-                    SingletonList<MemberDeclarationSyntax>(NamespaceDeclaration(IdentifierName(Settings.Generator.Namespace))
-                    .WithMembers(
-                        SingletonList<MemberDeclarationSyntax>(
-                            ClassDeclaration(Settings.Generator.ClassName)
-                            .WithModifiers(TokenList(Token(SyntaxKind.PartialKeyword)))
-                            .WithMembers(SingletonList(member))
-                ))));
-        }
-
 
         private SyntaxNode Format(ExpressionSyntax node, Type type)
         {
-            var cu = AddCreateMethod(node, type);
+            var cu = Settings.Generator?.Generate(this, node, type) ?? node;
 
             using (var ws = new AdhocWorkspace())
             {
