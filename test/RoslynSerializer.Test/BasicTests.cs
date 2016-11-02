@@ -23,98 +23,71 @@ namespace RoslynSerializer
         [Fact]
         public void IntegerProperty()
         {
-            using (var log = new StringWriter())
-            {
-                var obj = new TestClass1 { Test = 5 };
-
-                SourceCodeSerializer.Serialize(log, obj);
-
-                _helper.WriteLine(log.ToString());
-
-                var expected = @"new RoslynSerializer.TestClass1
+            var obj = new TestClass1 { Test = 5 };
+            var result = SourceCodeSerializer.Serialize(obj);
+            var expected = @"new RoslynSerializer.TestClass1
 {
     Test = 5
 }";
 
-                Assert.Equal(log.ToString(), expected);
-            }
+            _helper.WriteLine(result);
+            Assert.Equal(result, expected);
         }
 
         [Fact]
         public void IntegerPropertyDefaultValue()
         {
-            using (var log = new StringWriter())
-            {
-                var obj = new TestClass1 { Test = 0 };
+            var obj = new TestClass1 { Test = 0 };
+            var result = SourceCodeSerializer.Serialize(obj);
+            var expected = @"new RoslynSerializer.TestClass1 { }";
 
-                SourceCodeSerializer.Serialize(log, obj);
-
-                _helper.WriteLine(log.ToString());
-
-                var expected = @"new RoslynSerializer.TestClass1 { }";
-
-                Assert.Equal(expected, log.ToString());
-            }
+            _helper.WriteLine(result);
+            Assert.Equal(expected, result);
         }
 
         [Fact]
         public void IntegerPropertyNoNewLine()
         {
-            using (var log = new StringWriter())
+            var obj = new TestClass1 { Test = 5 };
+
+            var settings = new SerializerSettings
             {
-                var obj = new TestClass1 { Test = 5 };
+                ObjectInitializationNewLine = false
+            };
 
-                var settings = new SerializerSettings
-                {
-                    ObjectInitializationNewLine = false
-                };
+            var result = SourceCodeSerializer.Serialize(obj, settings);
+            var expected = @"new RoslynSerializer.TestClass1 { Test = 5 }";
 
-                SourceCodeSerializer.Serialize(log, obj, settings);
-
-                _helper.WriteLine(log.ToString());
-
-                var expected = @"new RoslynSerializer.TestClass1 { Test = 5 }";
-
-                Assert.Equal(log.ToString(), expected);
-            }
+            _helper.WriteLine(result);
+            Assert.Equal(result, expected);
         }
 
         [Fact]
         public void StringProperty()
         {
-            using (var log = new StringWriter())
-            {
-                var obj = new TestClass2 { Test = "Hello world" };
+            var obj = new TestClass2 { Test = "Hello world" };
+            var result = SourceCodeSerializer.Serialize(obj);
 
-                SourceCodeSerializer.Serialize(log, obj);
-
-                _helper.WriteLine(log.ToString());
-
-                var expected = @"new RoslynSerializer.TestClass2
+            var expected = @"new RoslynSerializer.TestClass2
 {
     Test = @""Hello world""
 }";
 
-                Assert.Equal(log.ToString(), expected);
-            }
+            _helper.WriteLine(result);
+            Assert.Equal(result, expected);
         }
 
         [Fact]
         public void NestedObjects()
         {
-            using (var log = new StringWriter())
+            var obj = new TestClass3
             {
-                var obj = new TestClass3
-                {
-                    Class1 = new TestClass1 { Test = 6 },
-                    Class2 = new TestClass2 { Test = "Hello world" }
-                };
+                Class1 = new TestClass1 { Test = 6 },
+                Class2 = new TestClass2 { Test = "Hello world" }
+            };
 
-                SourceCodeSerializer.Serialize(log, obj);
-
-                _helper.WriteLine(log.ToString());
-
-                var expected = @"new RoslynSerializer.TestClass3
+            var result = SourceCodeSerializer.Serialize(obj);
+            var expected = @"new RoslynSerializer.TestClass3
 {
     Class1 = new RoslynSerializer.TestClass1
     {
@@ -126,32 +99,28 @@ namespace RoslynSerializer
     }
 }";
 
-                Assert.Equal(log.ToString(), expected);
-            }
+            _helper.WriteLine(result);
+            Assert.Equal(result, expected);
         }
 
         [Fact]
         public void NestedObjectsWithClass()
         {
-            using (var log = new StringWriter())
+            var obj = new TestClass3
             {
-                var obj = new TestClass3
-                {
-                    Class1 = new TestClass1 { Test = 6 },
-                    Class2 = new TestClass2 { Test = "Hello world" }
-                };
+                Class1 = new TestClass1 { Test = 6 },
+                Class2 = new TestClass2 { Test = "Hello world" }
+            };
 
-                var settings = new SerializerSettings
-                {
-                    Generator = new FactoryMethodGenerator("Test", "Factory", "Create"),
-                    Usings = ImmutableArray.Create("System")
-                };
+            var settings = new SerializerSettings
+            {
+                Generator = new FactoryMethodGenerator("Test", "Factory", "Create"),
+                Usings = ImmutableArray.Create("System")
+            };
 
-                SourceCodeSerializer.Serialize(log, obj, settings);
+            var result = SourceCodeSerializer.Serialize(obj, settings);
 
-                _helper.WriteLine(log.ToString());
-
-                var expected = @"using System;
+            var expected = @"using System;
 
 namespace Test
 {
@@ -174,32 +143,28 @@ namespace Test
     }
 }";
 
-                Assert.Equal(log.ToString(), expected);
-            }
+            _helper.WriteLine(result);
+            Assert.Equal(result, expected);
         }
 
         [Fact]
         public void NestedObjectsWithClassAndUsings()
         {
-            using (var log = new StringWriter())
+            var obj = new TestClass3
             {
-                var obj = new TestClass3
-                {
-                    Class1 = new TestClass1 { Test = 6 },
-                    Class2 = new TestClass2 { Test = "Hello world" }
-                };
+                Class1 = new TestClass1 { Test = 6 },
+                Class2 = new TestClass2 { Test = "Hello world" }
+            };
 
-                var settings = new SerializerSettings
-                {
-                    Generator = new FactoryMethodGenerator("Test", "Factory", "Create"),
-                    Usings = ImmutableArray.Create("System", "RoslynSerializer")
-                };
+            var settings = new SerializerSettings
+            {
+                Generator = new FactoryMethodGenerator("Test", "Factory", "Create"),
+                Usings = ImmutableArray.Create("System", "RoslynSerializer")
+            };
 
-                SourceCodeSerializer.Serialize(log, obj, settings);
+            var result = SourceCodeSerializer.Serialize(obj, settings);
 
-                _helper.WriteLine(log.ToString());
-
-                var expected = @"using System;
+            var expected = @"using System;
 using RoslynSerializer;
 
 namespace Test
@@ -222,34 +187,29 @@ namespace Test
         }
     }
 }";
-
-                Assert.Equal(log.ToString(), expected);
-            }
+            _helper.WriteLine(result);
+            Assert.Equal(result, expected);
         }
 
 
         [Fact]
         public void NestedObjectsWithConstructorAndUsings()
         {
-            using (var log = new StringWriter())
+            var obj = new TestClass3
             {
-                var obj = new TestClass3
-                {
-                    Class1 = new TestClass1 { Test = 6 },
-                    Class2 = new TestClass2 { Test = "Hello world" }
-                };
+                Class1 = new TestClass1 { Test = 6 },
+                Class2 = new TestClass2 { Test = "Hello world" }
+            };
 
-                var settings = new SerializerSettings
-                {
-                    Generator = new ConstructorGenerator("Test", "Factory"),
-                    Usings = ImmutableArray.Create("System", "RoslynSerializer")
-                };
+            var settings = new SerializerSettings
+            {
+                Generator = new ConstructorGenerator("Test", "Factory"),
+                Usings = ImmutableArray.Create("System", "RoslynSerializer")
+            };
 
-                SourceCodeSerializer.Serialize(log, obj, settings);
+            var result = SourceCodeSerializer.Serialize(obj, settings);
 
-                _helper.WriteLine(log.ToString());
-
-                var expected = @"using System;
+            var expected = @"using System;
 using RoslynSerializer;
 
 namespace Test
@@ -270,33 +230,29 @@ namespace Test
     }
 }";
 
-                Assert.Equal(log.ToString(), expected);
-            }
+            _helper.WriteLine(result);
+            Assert.Equal(result, expected);
         }
 
         [Fact]
         public void GenericList()
         {
-            using (var log = new StringWriter())
+            var obj = new GenericList1
             {
-                var obj = new GenericList1
-                {
-                    List = new List<TestClass2>()
-                };
+                List = new List<TestClass2>()
+            };
 
-                obj.List.Add(new TestClass2 { Test = "Item1" });
-                obj.List.Add(new TestClass2 { Test = "Item2" });
+            obj.List.Add(new TestClass2 { Test = "Item1" });
+            obj.List.Add(new TestClass2 { Test = "Item2" });
 
-                var settings = new SerializerSettings
-                {
-                    Usings = ImmutableArray.Create("RoslynSerializer")
-                };
+            var settings = new SerializerSettings
+            {
+                Usings = ImmutableArray.Create("RoslynSerializer")
+            };
 
-                SourceCodeSerializer.Serialize(log, obj, settings);
+            var result = SourceCodeSerializer.Serialize(obj, settings);
 
-                _helper.WriteLine(log.ToString());
-
-                var expected = @"new GenericList1
+            var expected = @"new GenericList1
 {
     List = new TestClass2[] {
         new TestClass2
@@ -310,35 +266,31 @@ namespace Test
     }
 }";
 
-                Assert.Equal(log.ToString(), expected);
-            }
+            _helper.WriteLine(result);
+            Assert.Equal(result, expected);
         }
 
 
         [Fact]
         public void GenericList2()
         {
-            using (var log = new StringWriter())
+            var obj = new GenericList2
             {
-                var obj = new GenericList2
+                List = new TestClass2[]
                 {
-                    List = new TestClass2[]
-                    {
                         new TestClass2 { Test = "Item1" },
                         new TestClass2 { Test = "Item2" }
-                    }
-                };
+                }
+            };
 
-                var settings = new SerializerSettings
-                {
-                    Usings = ImmutableArray.Create("RoslynSerializer")
-                };
+            var settings = new SerializerSettings
+            {
+                Usings = ImmutableArray.Create("RoslynSerializer")
+            };
 
-                SourceCodeSerializer.Serialize(log, obj, settings);
+            var result = SourceCodeSerializer.Serialize(obj, settings);
 
-                _helper.WriteLine(log.ToString());
-
-                var expected = @"new GenericList2
+            var expected = @"new GenericList2
 {
     List = new TestClass2[] {
         new TestClass2
@@ -352,34 +304,30 @@ namespace Test
     }
 }";
 
-                Assert.Equal(log.ToString(), expected);
-            }
+            _helper.WriteLine(result);
+            Assert.Equal(result, expected);
         }
 
         [Fact]
         public void NonGenericList()
         {
-            using (var log = new StringWriter())
+            var obj = new NonGenericList1
             {
-                var obj = new NonGenericList1
+                List = new object[]
                 {
-                    List = new object[]
-                    {
                         new TestClass1 { Test = 2 },
                         new TestClass2 { Test = "Item2" }
-                    }
-                };
+                }
+            };
 
-                var settings = new SerializerSettings
-                {
-                    Usings = ImmutableArray.Create("RoslynSerializer")
-                };
+            var settings = new SerializerSettings
+            {
+                Usings = ImmutableArray.Create("RoslynSerializer")
+            };
 
-                SourceCodeSerializer.Serialize(log, obj, settings);
+            var result = SourceCodeSerializer.Serialize(obj, settings);
 
-                _helper.WriteLine(log.ToString());
-
-                var expected = @"new NonGenericList1
+            var expected = @"new NonGenericList1
 {
     List = new object[] {
         new TestClass1
@@ -393,101 +341,89 @@ namespace Test
     }
 }";
 
-                Assert.Equal(log.ToString(), expected);
-            }
+            _helper.WriteLine(result);
+            Assert.Equal(result, expected);
         }
 
         [Fact]
         public void DerivedMembers()
         {
-            using (var log = new StringWriter())
+            var obj = new DerivedTest1
             {
-                var obj = new DerivedTest1
-                {
-                    Other = 1,
-                    Test = 6
-                };
+                Other = 1,
+                Test = 6
+            };
 
-                var settings = new SerializerSettings
-                {
-                    Usings = ImmutableArray.Create("RoslynSerializer")
-                };
+            var settings = new SerializerSettings
+            {
+                Usings = ImmutableArray.Create("RoslynSerializer")
+            };
 
-                SourceCodeSerializer.Serialize(log, obj, settings);
+            var result = SourceCodeSerializer.Serialize(obj, settings);
 
-                _helper.WriteLine(log.ToString());
-
-                var expected = @"new DerivedTest1
+            var expected = @"new DerivedTest1
 {
     Other = 1,
     Test = 6
 }";
 
-                Assert.Equal(log.ToString(), expected);
-            }
+            _helper.WriteLine(result);
+            Assert.Equal(result, expected);
         }
 
         [Fact]
         public void IgnorablePropertyTest()
         {
-            using (var log = new StringWriter())
+            var obj = new IgnorableProperty
             {
-                var obj = new IgnorableProperty
-                {
-                    Field1 = 1,
-                    Field2 = 2,
-                    Field3 = 3,
-                };
+                Field1 = 1,
+                Field2 = 2,
+                Field3 = 3,
+            };
 
-                var settings = new SerializerSettings
-                {
-                    Usings = ImmutableArray.Create("RoslynSerializer")
-                };
+            var settings = new SerializerSettings
+            {
+                Usings = ImmutableArray.Create("RoslynSerializer")
+            };
 
-                SourceCodeSerializer.Serialize(log, obj, settings);
+            var result = SourceCodeSerializer.Serialize(obj, settings);
 
-                _helper.WriteLine(log.ToString());
-
-                var expected = @"new IgnorableProperty
+            var expected = @"new IgnorableProperty
 {
     Field1 = 1,
     Field3 = 3
 }";
 
-                Assert.Equal(log.ToString(), expected);
-            }
+            _helper.WriteLine(result);
+            Assert.Equal(result, expected);
         }
 
         [Fact]
         public void IgnorableProperty2Test()
         {
-            using (var log = new StringWriter())
+            var obj = new IgnorableProperty2
             {
-                var obj = new IgnorableProperty2
-                {
-                    Field1 = 1,
-                    Field2 = 2,
-                    Field3 = 3,
-                };
+                Field1 = 1,
+                Field2 = 2,
+                Field3 = 3,
+            };
 
-                var settings = new SerializerSettings
-                {
-                    Usings = ImmutableArray.Create("RoslynSerializer")
-                };
+            var settings = new SerializerSettings
+            {
+                Usings = ImmutableArray.Create("RoslynSerializer")
+            };
 
-                SourceCodeSerializer.Serialize(log, obj, settings);
+            var result = SourceCodeSerializer.Serialize(obj, settings);
 
-                _helper.WriteLine(log.ToString());
-
-                var expected = @"new IgnorableProperty2
+            var expected = @"new IgnorableProperty2
 {
     Field1 = 1,
     Field2 = 2,
     Field3 = 3
 }";
 
-                Assert.Equal(log.ToString(), expected);
-            }
+            _helper.WriteLine(result);
+            Assert.Equal(result, expected);
         }
 
         [Theory]

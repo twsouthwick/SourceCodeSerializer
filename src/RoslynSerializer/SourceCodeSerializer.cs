@@ -21,6 +21,18 @@ namespace RoslynSerializer
             Settings = settings ?? new SerializerSettings();
         }
 
+        public static string Serialize<T>(T obj, SerializerSettings settings = null)
+        {
+            var serializer = new SourceCodeSerializer(settings);
+
+            using (var writer = new StringWriter())
+            {
+                serializer.Serialize(writer, obj);
+
+                return writer.ToString();
+            }
+        }
+
         public static void Serialize<T>(TextWriter writer, T obj, SerializerSettings settings = null)
         {
             var serializer = new SourceCodeSerializer(settings);
