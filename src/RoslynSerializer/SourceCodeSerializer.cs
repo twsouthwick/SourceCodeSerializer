@@ -63,7 +63,7 @@ namespace RoslynSerializer
             {
                 if (converter.CanConvert(type))
                 {
-                    return converter.ConvertSyntax(type, obj, this);
+                    return converter.ConvertToExpression(type, obj, this);
                 }
             }
 

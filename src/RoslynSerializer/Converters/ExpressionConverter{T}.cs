@@ -7,8 +7,8 @@ namespace RoslynSerializer.Converters
     {
         public override bool CanConvert(Type type) => type == typeof(T);
 
-        public sealed override ExpressionSyntax ConvertSyntax(Type type, object obj, SourceCodeSerializer serializer) => ConvertSyntax(type, (T)obj, serializer);
+        public sealed override ExpressionSyntax ConvertToExpression(Type type, object obj, SourceCodeSerializer serializer) => ConvertToExpression(type, (T)obj, serializer);
 
-        public abstract ExpressionSyntax ConvertSyntax(Type type, T obj, SourceCodeSerializer serializer);
+        public abstract ExpressionSyntax ConvertToExpression(Type type, T obj, SourceCodeSerializer serializer);
     }
 }

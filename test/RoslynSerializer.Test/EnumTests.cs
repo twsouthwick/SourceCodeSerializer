@@ -35,7 +35,7 @@ namespace RoslynSerializer
         {
             var serializer = new SourceCodeSerializer();
             var converter = new EnumConverter();
-            var result = converter.ConvertSyntax(type, value, serializer);
+            var result = converter.ConvertToExpression(type, value, serializer);
 
             _helper.WriteLine($"Expected: {expected}");
             _helper.WriteLine($"Result: {result}");
@@ -57,7 +57,7 @@ namespace RoslynSerializer
             };
             var serializer = new SourceCodeSerializer(settings);
             var converter = new EnumConverter();
-            var result = converter.ConvertSyntax(type, value, serializer);
+            var result = converter.ConvertToExpression(type, value, serializer);
 
             _helper.WriteLine($"Expected: {expected}");
             _helper.WriteLine($"Result: {result}");

@@ -13,7 +13,7 @@ namespace RoslynSerializer.Test
         public void TestDouble(double value, string expected)
         {
             var primitive = new PrimitiveConverter();
-            var converted = primitive.ConvertSyntax(typeof(double), value, null);
+            var converted = primitive.ConvertToExpression(typeof(double), value, null);
 
             Assert.Equal(expected, converted.ToString());
         }

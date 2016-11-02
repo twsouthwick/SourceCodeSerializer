@@ -14,7 +14,7 @@ namespace RoslynSerializer.Converters
     {
         public override bool CanConvert(Type type) => typeof(IEnumerable).GetTypeInfo().IsAssignableFrom(type.GetTypeInfo());
 
-        public override ExpressionSyntax ConvertSyntax(Type type, IEnumerable collection, SourceCodeSerializer serializer)
+        public override ExpressionSyntax ConvertToExpression(Type type, IEnumerable collection, SourceCodeSerializer serializer)
         {
             var arrayType = GetGenericParameter(type);
             var generic = collection.Cast<object>();

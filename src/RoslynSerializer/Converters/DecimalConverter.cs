@@ -7,7 +7,7 @@ namespace RoslynSerializer.Converters
 {
     public sealed class DecimalConverter : ExpressionConverter<decimal>
     {
-        public override ExpressionSyntax ConvertSyntax(Type type, decimal obj, SourceCodeSerializer serializer)
+        public override ExpressionSyntax ConvertToExpression(Type type, decimal obj, SourceCodeSerializer serializer)
         {
             return ParseExpression($"{obj}m");
         }

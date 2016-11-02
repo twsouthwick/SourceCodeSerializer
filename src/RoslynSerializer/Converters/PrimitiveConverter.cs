@@ -19,7 +19,7 @@ namespace RoslynSerializer.Converters
 
         public override bool CanConvert(Type type) => type.GetTypeInfo().IsPrimitive;
 
-        public override ExpressionSyntax ConvertSyntax(Type type, object obj, SourceCodeSerializer serializer)
+        public override ExpressionSyntax ConvertToExpression(Type type, object obj, SourceCodeSerializer serializer)
         {
             return CornerCases(type, obj) ?? ParseExpression($"{obj}{GetSuffix(type)}");
         }

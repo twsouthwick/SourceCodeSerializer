@@ -7,7 +7,7 @@ namespace RoslynSerializer.Converters
 {
     public sealed class DateTimeOffsetConverter : ExpressionConverter<DateTimeOffset>
     {
-        public override ExpressionSyntax ConvertSyntax(Type type, DateTimeOffset obj, SourceCodeSerializer serializer)
+        public override ExpressionSyntax ConvertToExpression(Type type, DateTimeOffset obj, SourceCodeSerializer serializer)
         {
             return ParseExpression($"new DateTimeOffset({obj.Ticks}, new TimeSpan({obj.Offset.Ticks}))");
         }

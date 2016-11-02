@@ -7,6 +7,6 @@ namespace RoslynSerializer.Converters
     {
         public abstract bool CanConvert(Type type);
 
-        public abstract ExpressionSyntax ConvertSyntax(Type type, object obj, SourceCodeSerializer serializer);
+        public abstract ExpressionSyntax ConvertToExpression(Type type, object obj, SourceCodeSerializer serializer);
     }
 }

@@ -14,7 +14,7 @@ namespace RoslynSerializer.Converters
     {
         public override bool CanConvert(Type type) => type.GetTypeInfo().IsEnum;
 
-        public override ExpressionSyntax ConvertSyntax(Type type, object obj, SourceCodeSerializer serializer)
+        public override ExpressionSyntax ConvertToExpression(Type type, object obj, SourceCodeSerializer serializer)
         {
             var entries = GetFlags(type, (Enum)obj)
                 .Select(e => $"{serializer.GetTypeName(type)}.{e}");

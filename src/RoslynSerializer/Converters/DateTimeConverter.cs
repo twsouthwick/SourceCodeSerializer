@@ -7,7 +7,7 @@ namespace RoslynSerializer.Converters
 {
     public sealed class DateTimeConverter : ExpressionConverter<DateTime>
     {
-        public override ExpressionSyntax ConvertSyntax(Type type, DateTime obj, SourceCodeSerializer serializer)
+        public override ExpressionSyntax ConvertToExpression(Type type, DateTime obj, SourceCodeSerializer serializer)
         {
             return ParseExpression($"new DateTime({obj.Ticks})");
         }
