@@ -566,7 +566,7 @@ namespace Test
         public virtual int Field3 { get; set; }
     }
 
-    public class IgnorableProperty2:IgnorableProperty
+    public class IgnorableProperty2 : IgnorableProperty
     {
         public override int Field2 { get; set; }
     }
