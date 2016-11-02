@@ -21,7 +21,7 @@ namespace RoslynSerializer.Converters
             var propertyNodes = properties.Select(property =>
             {
                 var value = property.GetValue(obj);
-                var expression = serializer.WriteValue(value);
+                var expression = serializer.GetExpression(value);
 
                 if (expression == null)
                 {

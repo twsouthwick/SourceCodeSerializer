@@ -19,7 +19,7 @@ namespace RoslynSerializer.Converters
             var arrayType = GetGenericParameter(type);
             var generic = collection.Cast<object>();
 
-            var items = generic.Select(item => serializer.WriteValue(item).WithLeadingTrivia(TriviaList(LineFeed)));
+            var items = generic.Select(item => serializer.GetExpression(item).WithLeadingTrivia(TriviaList(LineFeed)));
 
             return ArrayCreationExpression(
                 ArrayType(serializer.GetTypeName(arrayType), SingletonList(ArrayRankSpecifier(SingletonSeparatedList<ExpressionSyntax>(OmittedArraySizeExpression())))))

@@ -9,19 +9,6 @@ namespace RoslynSerializer
 {
     public class SourceCodeSerializer
     {
-        private static ExpressionConverter[] s_converters = new ExpressionConverter[]
-        {
-            new PrimitiveConverter(),
-            new StringConverter(),
-            new EnumConverter(),
-            new DateTimeConverter(),
-            new DateTimeOffsetConverter(),
-            new DecimalConverter(),
-            new UnknownValueTypeConverter(),
-            new EnumerableConverter(),
-            new ObjectConverter()
-        };
-
         public SerializerSettings Settings { get; }
 
         public SourceCodeSerializer()
@@ -41,30 +28,12 @@ namespace RoslynSerializer
             serializer.Serialize(writer, obj);
         }
 
-        private void Serialize<T>(TextWriter writer, T obj)
-        {
-            var node = Format(WriteValue(obj), typeof(T));
-
-            node.WriteTo(writer);
-        }
-
         public TypeSyntax GetTypeName(Type type)
         {
             return type.GetSyntaxNode(Settings.Usings);
         }
 
-
-        private SyntaxNode Format(ExpressionSyntax node, Type type)
-        {
-            var cu = Settings.Generator?.Generate(this, node, type) ?? node;
-
-            using (var ws = new AdhocWorkspace())
-            {
-                return Formatter.Format(cu, ws);
-            }
-        }
-
-        public ExpressionSyntax WriteValue(object obj)
+        public ExpressionSyntax GetExpression(object obj)
         {
             if (obj == null)
             {
@@ -78,7 +47,7 @@ namespace RoslynSerializer
                 return null;
             }
 
-            foreach (var converter in s_converters)
+            foreach (var converter in Settings.Converters)
             {
                 if (converter.CanConvert(type))
                 {
@@ -87,6 +56,20 @@ namespace RoslynSerializer
             }
 
             throw new UnknownTypeException(type);
+        }
+
+        private void Serialize<T>(TextWriter writer, T obj)
+        {
+            var expression = GetExpression(obj);
+
+            var cu = Settings.Generator?.Generate(this, expression, typeof(T)) ?? expression;
+
+            using (var ws = new AdhocWorkspace())
+            {
+                var formatted = Formatter.Format(cu, ws);
+
+                formatted.WriteTo(writer);
+            }
         }
     }
 }

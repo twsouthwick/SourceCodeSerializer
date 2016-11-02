@@ -3,6 +3,7 @@ using RoslynSerializer.Generators;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.IO;
 using Xunit;
 using Xunit.Abstractions;
@@ -143,7 +144,7 @@ namespace RoslynSerializer
                 var settings = new SerializerSettings
                 {
                     Generator = new FactoryMethodGenerator("Test", "Factory", "Create"),
-                    Usings = new[] { "System" }
+                    Usings = ImmutableArray.Create("System")
                 };
 
                 SourceCodeSerializer.Serialize(log, obj, settings);
@@ -191,7 +192,7 @@ namespace Test
                 var settings = new SerializerSettings
                 {
                     Generator = new FactoryMethodGenerator("Test", "Factory", "Create"),
-                    Usings = new[] { "System", "RoslynSerializer" }
+                    Usings = ImmutableArray.Create("System", "RoslynSerializer")
                 };
 
                 SourceCodeSerializer.Serialize(log, obj, settings);
@@ -241,7 +242,7 @@ namespace Test
                 var settings = new SerializerSettings
                 {
                     Generator = new ConstructorGenerator("Test", "Factory"),
-                    Usings = new[] { "System", "RoslynSerializer" }
+                    Usings = ImmutableArray.Create("System", "RoslynSerializer")
                 };
 
                 SourceCodeSerializer.Serialize(log, obj, settings);
@@ -288,7 +289,7 @@ namespace Test
 
                 var settings = new SerializerSettings
                 {
-                    Usings = new[] { "RoslynSerializer" }
+                    Usings = ImmutableArray.Create("RoslynSerializer")
                 };
 
                 SourceCodeSerializer.Serialize(log, obj, settings);
@@ -330,7 +331,7 @@ namespace Test
 
                 var settings = new SerializerSettings
                 {
-                    Usings = new[] { "RoslynSerializer" }
+                    Usings = ImmutableArray.Create("RoslynSerializer")
                 };
 
                 SourceCodeSerializer.Serialize(log, obj, settings);
@@ -371,7 +372,7 @@ namespace Test
 
                 var settings = new SerializerSettings
                 {
-                    Usings = new[] { "RoslynSerializer" }
+                    Usings = ImmutableArray.Create("RoslynSerializer")
                 };
 
                 SourceCodeSerializer.Serialize(log, obj, settings);
@@ -409,7 +410,7 @@ namespace Test
 
                 var settings = new SerializerSettings
                 {
-                    Usings = new[] { "RoslynSerializer" }
+                    Usings = ImmutableArray.Create("RoslynSerializer")
                 };
 
                 SourceCodeSerializer.Serialize(log, obj, settings);
@@ -440,7 +441,7 @@ namespace Test
 
                 var settings = new SerializerSettings
                 {
-                    Usings = new[] { "RoslynSerializer" }
+                    Usings = ImmutableArray.Create("RoslynSerializer")
                 };
 
                 SourceCodeSerializer.Serialize(log, obj, settings);
@@ -471,7 +472,7 @@ namespace Test
 
                 var settings = new SerializerSettings
                 {
-                    Usings = new[] { "RoslynSerializer" }
+                    Usings = ImmutableArray.Create("RoslynSerializer")
                 };
 
                 SourceCodeSerializer.Serialize(log, obj, settings);

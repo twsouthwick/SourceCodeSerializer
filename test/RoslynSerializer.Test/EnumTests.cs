@@ -1,5 +1,6 @@
 ﻿using RoslynSerializer.Converters;
 using System;
+using System.Collections.Immutable;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -52,7 +53,7 @@ namespace RoslynSerializer
         {
             var settings = new SerializerSettings
             {
-                Usings = new[] { "RoslynSerializer" }
+                Usings = ImmutableArray.Create("RoslynSerializer")
             };
             var serializer = new SourceCodeSerializer(settings);
             var converter = new EnumConverter();
