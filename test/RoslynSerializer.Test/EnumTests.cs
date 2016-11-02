@@ -1,8 +1,5 @@
 ﻿using RoslynSerializer.Converters;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -35,7 +32,7 @@ namespace RoslynSerializer
         [InlineData(typeof(EnumTest2), EnumTest2.Item1 | EnumTest2.Item3, "RoslynSerializer.EnumTest2.Item1 | RoslynSerializer.EnumTest2.Item3")]
         public void BasicEnumTest(Type type, object value, string expected)
         {
-            var serializer = SourceCodeSerializer.Create();
+            var serializer = new SourceCodeSerializer();
             var converter = new EnumConverter();
             var result = converter.ConvertSyntax(type, value, serializer);
 
@@ -53,7 +50,11 @@ namespace RoslynSerializer
         [InlineData(typeof(EnumTest2), EnumTest2.Item1 | EnumTest2.Item3, "EnumTest2.Item1 | EnumTest2.Item3")]
         public void BasicEnumTestWithUsing(Type type, object value, string expected)
         {
-            var serializer = SourceCodeSerializer.Create().AddUsing("RoslynSerializer");
+            var settings = new SerializerSettings
+            {
+                Usings = new[] { "RoslynSerializer" }
+            };
+            var serializer = new SourceCodeSerializer(settings);
             var converter = new EnumConverter();
             var result = converter.ConvertSyntax(type, value, serializer);
 

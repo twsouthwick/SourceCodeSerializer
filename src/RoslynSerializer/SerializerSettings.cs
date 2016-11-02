@@ -1,44 +1,44 @@
 ﻿using System;
-using System.Collections.Immutable;
-using System.Runtime.CompilerServices;
 
 namespace RoslynSerializer
 {
     public class SerializerSettings
     {
-        private static readonly SerializerSettings s_default = new SerializerSettings(ImmutableDictionary.Create<string, bool>(StringComparer.Ordinal))
-            .WithObjectInitializationNewLine(true);
+        public bool ObjectInitializationNewLine { get; set; } = true;
 
-        private readonly ImmutableDictionary<string, bool> _values;
+        public SourceGeneration Generator { get; set; }
 
-        public static SerializerSettings Create() => s_default;
+        public string[] Usings { get; set; } = Array.Empty<string>();
+    }
 
-        private SerializerSettings(ImmutableDictionary<string, bool> values)
+    public abstract class SourceGeneration
+    {
+        public SourceGeneration(string ns, string className)
         {
-            _values = values;
+            Namespace = ns;
+            ClassName = className;
         }
 
-        public bool ObjectInitializationNewLine => GetValue();
+        public string Namespace { get; }
+        public string ClassName { get; }
+    }
 
-        private bool GetValue([CallerMemberName]string key = null)
+    public class FactoryMethod : SourceGeneration
+    {
+        public FactoryMethod(string ns, string className, string method)
+            : base(ns, className)
         {
-            bool value;
-            if (_values.TryGetValue(key, out value))
-            {
-                return value;
-            }
-
-            return false;
+            MethodName = method;
         }
 
-        public SerializerSettings WithObjectInitializationNewLine(bool value)
-        {
-            return SetValue(nameof(ObjectInitializationNewLine), value);
-        }
+        public string MethodName { get; }
+    }
 
-        private SerializerSettings SetValue(string key, bool value)
+    public class Constructor : SourceGeneration
+    {
+        public Constructor(string ns, string className)
+            : base(ns, className)
         {
-            return new SerializerSettings(_values.SetItem(key, value));
         }
     }
 }

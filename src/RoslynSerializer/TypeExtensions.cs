@@ -3,6 +3,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
@@ -33,6 +34,11 @@ namespace RoslynSerializer
 
         public static TypeSyntax GetSyntaxNode(this Type type, IEnumerable<string> usings)
         {
+            if (usings == null)
+            {
+                usings = Enumerable.Empty<string>();
+            }
+
             SyntaxKind kind;
             if (s_syntaxKinds.TryGetValue(type, out kind))
             {

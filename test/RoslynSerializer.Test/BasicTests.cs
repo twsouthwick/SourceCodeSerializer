@@ -25,9 +25,7 @@ namespace RoslynSerializer
             {
                 var obj = new TestClass1 { Test = 5 };
 
-                var node = SourceCodeSerializer.Create()
-                    .AddTextWriter(log)
-                    .Serialize(obj);
+                SourceCodeSerializer.Serialize(log, obj);
 
                 _helper.WriteLine(log.ToString());
 
@@ -47,9 +45,7 @@ namespace RoslynSerializer
             {
                 var obj = new TestClass1 { Test = 0 };
 
-                var node = SourceCodeSerializer.Create()
-                    .AddTextWriter(log)
-                    .Serialize(obj);
+                SourceCodeSerializer.Serialize(log, obj);
 
                 _helper.WriteLine(log.ToString());
 
@@ -66,10 +62,12 @@ namespace RoslynSerializer
             {
                 var obj = new TestClass1 { Test = 5 };
 
-                var node = SourceCodeSerializer.Create()
-                    .AddTextWriter(log)
-                    .WithSettings(SerializerSettings.Create().WithObjectInitializationNewLine(false))
-                    .Serialize(obj);
+                var settings = new SerializerSettings
+                {
+                    ObjectInitializationNewLine = false
+                };
+
+                SourceCodeSerializer.Serialize(log, obj, settings);
 
                 _helper.WriteLine(log.ToString());
 
@@ -86,9 +84,7 @@ namespace RoslynSerializer
             {
                 var obj = new TestClass2 { Test = "Hello world" };
 
-                var node = SourceCodeSerializer.Create()
-                    .AddTextWriter(log)
-                    .Serialize(obj);
+                SourceCodeSerializer.Serialize(log, obj);
 
                 _helper.WriteLine(log.ToString());
 
@@ -112,9 +108,7 @@ namespace RoslynSerializer
                     Class2 = new TestClass2 { Test = "Hello world" }
                 };
 
-                var node = SourceCodeSerializer.Create()
-                    .AddTextWriter(log)
-                    .Serialize(obj);
+                SourceCodeSerializer.Serialize(log, obj);
 
                 _helper.WriteLine(log.ToString());
 
@@ -145,10 +139,13 @@ namespace RoslynSerializer
                     Class2 = new TestClass2 { Test = "Hello world" }
                 };
 
-                var node = SourceCodeSerializer.Create()
-                    .AddTextWriter(log)
-                    .AddCreateMethod("Test", "Factory")
-                    .Serialize(obj);
+                var settings = new SerializerSettings
+                {
+                    Generator = new FactoryMethod("Test", "Factory", "Create"),
+                    Usings = new[] { "System" }
+                };
+
+                SourceCodeSerializer.Serialize(log, obj, settings);
 
                 _helper.WriteLine(log.ToString());
 
@@ -190,11 +187,13 @@ namespace Test
                     Class2 = new TestClass2 { Test = "Hello world" }
                 };
 
-                var node = SourceCodeSerializer.Create()
-                    .AddTextWriter(log)
-                    .AddCreateMethod("Test", "Factory")
-                    .AddUsing("RoslynSerializer")
-                    .Serialize(obj);
+                var settings = new SerializerSettings
+                {
+                    Generator = new FactoryMethod("Test", "Factory", "Create"),
+                    Usings = new[] { "System", "RoslynSerializer" }
+                };
+
+                SourceCodeSerializer.Serialize(log, obj, settings);
 
                 _helper.WriteLine(log.ToString());
 
@@ -238,11 +237,13 @@ namespace Test
                     Class2 = new TestClass2 { Test = "Hello world" }
                 };
 
-                var node = SourceCodeSerializer.Create()
-                    .AddTextWriter(log)
-                    .AddConstructor("Test", "Factory")
-                    .AddUsing("RoslynSerializer")
-                    .Serialize(obj);
+                var settings = new SerializerSettings
+                {
+                    Generator = new Constructor("Test", "Factory"),
+                    Usings = new[] { "System", "RoslynSerializer" }
+                };
+
+                SourceCodeSerializer.Serialize(log, obj, settings);
 
                 _helper.WriteLine(log.ToString());
 
@@ -272,31 +273,6 @@ namespace Test
         }
 
         [Fact]
-        public void EnumValues()
-        {
-            using (var log = new StringWriter())
-            {
-                var obj = new TestClass4
-                {
-                    Color = ConsoleColor.Red
-                };
-
-                var node = SourceCodeSerializer.Create()
-                    .AddTextWriter(log)
-                    .Serialize(obj);
-
-                _helper.WriteLine(log.ToString());
-
-                var expected = @"new RoslynSerializer.TestClass4
-{
-    Color = ConsoleColor.Red
-}";
-
-                Assert.Equal(log.ToString(), expected);
-            }
-        }
-
-        [Fact]
         public void GenericList()
         {
             using (var log = new StringWriter())
@@ -309,10 +285,12 @@ namespace Test
                 obj.List.Add(new TestClass2 { Test = "Item1" });
                 obj.List.Add(new TestClass2 { Test = "Item2" });
 
-                var node = SourceCodeSerializer.Create()
-                    .AddTextWriter(log)
-                    .AddUsing("RoslynSerializer")
-                    .Serialize(obj);
+                var settings = new SerializerSettings
+                {
+                    Usings = new[] { "RoslynSerializer" }
+                };
+
+                SourceCodeSerializer.Serialize(log, obj, settings);
 
                 _helper.WriteLine(log.ToString());
 
@@ -349,10 +327,12 @@ namespace Test
                     }
                 };
 
-                var node = SourceCodeSerializer.Create()
-                    .AddTextWriter(log)
-                    .AddUsing("RoslynSerializer")
-                    .Serialize(obj);
+                var settings = new SerializerSettings
+                {
+                    Usings = new[] { "RoslynSerializer" }
+                };
+
+                SourceCodeSerializer.Serialize(log, obj, settings);
 
                 _helper.WriteLine(log.ToString());
 
@@ -388,10 +368,12 @@ namespace Test
                     }
                 };
 
-                var node = SourceCodeSerializer.Create()
-                    .AddTextWriter(log)
-                    .AddUsing("RoslynSerializer")
-                    .Serialize(obj);
+                var settings = new SerializerSettings
+                {
+                    Usings = new[] { "RoslynSerializer" }
+                };
+
+                SourceCodeSerializer.Serialize(log, obj, settings);
 
                 _helper.WriteLine(log.ToString());
 
@@ -424,10 +406,12 @@ namespace Test
                     Test = 6
                 };
 
-                var node = SourceCodeSerializer.Create()
-                    .AddTextWriter(log)
-                    .AddUsing("RoslynSerializer")
-                    .Serialize(obj);
+                var settings = new SerializerSettings
+                {
+                    Usings = new[] { "RoslynSerializer" }
+                };
+
+                SourceCodeSerializer.Serialize(log, obj, settings);
 
                 _helper.WriteLine(log.ToString());
 
@@ -453,10 +437,12 @@ namespace Test
                     Field3 = 3,
                 };
 
-                var node = SourceCodeSerializer.Create()
-                    .AddTextWriter(log)
-                    .AddUsing("RoslynSerializer")
-                    .Serialize(obj);
+                var settings = new SerializerSettings
+                {
+                    Usings = new[] { "RoslynSerializer" }
+                };
+
+                SourceCodeSerializer.Serialize(log, obj, settings);
 
                 _helper.WriteLine(log.ToString());
 
@@ -482,10 +468,12 @@ namespace Test
                     Field3 = 3,
                 };
 
-                var node = SourceCodeSerializer.Create()
-                    .AddTextWriter(log)
-                    .AddUsing("RoslynSerializer")
-                    .Serialize(obj);
+                var settings = new SerializerSettings
+                {
+                    Usings = new[] { "RoslynSerializer" }
+                };
+
+                SourceCodeSerializer.Serialize(log, obj, settings);
 
                 _helper.WriteLine(log.ToString());
 
@@ -529,11 +517,6 @@ namespace Test
         public TestClass1 Class1 { get; set; }
 
         public TestClass2 Class2 { get; set; }
-    }
-
-    public class TestClass4
-    {
-        public ConsoleColor Color { get; set; }
     }
 
     public class GenericList1
