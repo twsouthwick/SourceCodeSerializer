@@ -22,7 +22,7 @@ namespace RoslynSerializer.Generators
 
         protected abstract SyntaxNode GetMember(SourceCodeSerializer serializer, ExpressionSyntax node, Type type);
 
-        public override SyntaxNode Generate(SourceCodeSerializer serializer, ExpressionSyntax node, Type type)
+        public sealed override SyntaxNode Generate(SourceCodeSerializer serializer, ExpressionSyntax node, Type type)
         {
             var usings = serializer.Settings.Usings.Select(@using => UsingDirective(IdentifierName(@using)));
             var member = GetMember(serializer, node, type);
