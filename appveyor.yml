@@ -1,0 +1,25 @@
+os: Visual Studio 2015
+
+build_script:
+  - ps: gitversion /output buildserver
+  - ps: .\Update-Version.ps1 $env:GitVersion_NuGetVersion
+  - ps: dotnet --info
+  - ps: dotnet restore
+  - ps: dotnet --verbose build .\test\RoslynSerializer.Test
+  - ps: dotnet --verbose pack .\src\RoslynSerializer -o .
+
+test_script:
+  - cmd: dotnet test .\test\RoslynSerializer.Test
+
+artifacts:
+  - path: '*.nupkg'
+    name: NuGetArtifacts
+
+deploy:
+  provider: NuGet
+  server: https://www.myget.org/F/source-code-serializer/api/v2/package
+  api_key:
+    secure: il1wdXL6HbnB8b6+T4PbKzkSVVg0GhCodYb1/jLqbQLH3qeqnvBlUfQv0J1x8GAA
+  skip_symbols: false
+  symbol_server: https://www.myget.org/F/source-code-serializer/symbols/api/v2/package
+  artifact: /.*\.nupkg/

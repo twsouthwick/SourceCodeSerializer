@@ -4,6 +4,12 @@
 * text=auto
 
 ###############################################################################
+# This is needed due to the source code generation outputing with CRLF so it needs
+# to match the text in the tests.
+###############################################################################
+*.cs eol=crlf
+
+###############################################################################
 # Set default behavior for command prompt diff.
 #
 # This is need for earlier builds of msysgit that does not have it on by
