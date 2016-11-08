@@ -1,11 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.CodeAnalysis;
+﻿using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System;
+using System.Collections.Immutable;
+
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
-using Microsoft.CodeAnalysis.CSharp;
 
 namespace RoslynSerializer.Generators
 {
@@ -19,11 +17,13 @@ namespace RoslynSerializer.Generators
 
         public string MethodName { get; }
 
-        protected override SyntaxNode GetMember(SourceCodeSerializer serializer, ExpressionSyntax node, Type type)
+        protected override ImmutableArray<MemberDeclarationSyntax> GetMembers(SourceCodeSerializer serializer, ExpressionSyntax node, Type type)
         {
-            return MethodDeclaration(serializer.GetTypeName(type), Identifier(MethodName))
+            var method = MethodDeclaration(serializer.GetTypeName(type), Identifier(MethodName))
                   .WithModifiers(TokenList(Token(SyntaxKind.PublicKeyword)))
                   .WithBody(Block(SingletonList<StatementSyntax>(ReturnStatement(node))));
+
+            return ImmutableArray.Create<MemberDeclarationSyntax>(method);
         }
     }
 }

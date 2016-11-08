@@ -2,6 +2,7 @@
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
+using System.Collections.Immutable;
 using System.Linq;
 
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
@@ -20,12 +21,12 @@ namespace RoslynSerializer.Generators
 
         public string ClassName { get; }
 
-        protected abstract SyntaxNode GetMember(SourceCodeSerializer serializer, ExpressionSyntax node, Type type);
+        protected abstract ImmutableArray<MemberDeclarationSyntax> GetMembers(SourceCodeSerializer serializer, ExpressionSyntax node, Type type);
 
         public sealed override SyntaxNode Generate(SourceCodeSerializer serializer, ExpressionSyntax node, Type type)
         {
             var usings = serializer.Settings.Usings.Select(@using => UsingDirective(IdentifierName(@using)));
-            var member = GetMember(serializer, node, type);
+            var members = GetMembers(serializer, node, type);
 
             return CompilationUnit()
                 .WithUsings(List(usings))
@@ -35,7 +36,7 @@ namespace RoslynSerializer.Generators
                         SingletonList<MemberDeclarationSyntax>(
                             ClassDeclaration(ClassName)
                             .WithModifiers(TokenList(Token(SyntaxKind.PartialKeyword)))
-                            .WithMembers(SingletonList(member))
+                            .WithMembers(List(members))
                 ))));
         }
     }
