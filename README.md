@@ -2,6 +2,7 @@ Source Code Serializer
 =================
 
 [![Build status](https://ci.appveyor.com/api/projects/status/1uj500v255y70odw?svg=true)](https://ci.appveyor.com/project/twsouthwick/sourcecodeserializer)
+[![MyGet](https://img.shields.io/myget/source-code-serializer/v/RoslynSerializer.svg?style=plastic)]()
 
 This is a tool to take a .NET object representation in memory and serialize it to C# code. This is useful for creating test data, where an object can be serialized to C# and easily replicated within a test case.
 
