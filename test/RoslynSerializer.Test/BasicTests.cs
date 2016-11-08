@@ -1,10 +1,8 @@
-﻿using RoslynSerializer.Converters;
-using RoslynSerializer.Generators;
+﻿using RoslynSerializer.Generators;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.IO;
 using Xunit;
 using Xunit.Abstractions;
 
