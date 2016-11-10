@@ -76,28 +76,27 @@ namespace RoslynSerializer.Converters
             return false;
         }
 
-        private IEnumerable<PropertyInfo> GetProperties(Type type)
+        public IEnumerable<PropertyInfo> GetProperties(Type type)
         {
-            var result = new SortedSet<PropertyInfo>(PropertyInfoComparer.Instance);
-
-            FillProperties(type, result);
-
-            return result;
+            return FillProperties(type, new SortedSet<PropertyInfo>(PropertyInfoComparer.Instance), new HashSet<string>(StringComparer.Ordinal));
         }
 
-        private void FillProperties(Type type, SortedSet<PropertyInfo> set)
+        private IEnumerable<PropertyInfo> FillProperties(Type type, SortedSet<PropertyInfo> result, HashSet<string> alreadySeen)
         {
             if (type == typeof(object))
             {
-                return;
+                return result;
             }
 
-            foreach (var property in type.GetTypeInfo().DeclaredProperties.Where(IncludeProperty))
+            foreach (var property in type.GetTypeInfo().DeclaredProperties)
             {
-                set.Add(property);
+                if (alreadySeen.Add(property.Name) && IncludeProperty(property))
+                {
+                    result.Add(property);
+                }
             }
 
-            FillProperties(type.GetTypeInfo().BaseType, set);
+            return FillProperties(type.GetTypeInfo().BaseType, result, alreadySeen);
         }
 
         private class PropertyInfoComparer : IComparer<PropertyInfo>
