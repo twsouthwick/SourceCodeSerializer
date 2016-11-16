@@ -423,6 +423,28 @@ namespace Test
             _helper.WriteLine(result);
             Assert.Equal(result, expected);
         }
+
+        [Fact]
+        public void IgnoreDefaultValueTest()
+        {
+            var obj = new ClassWithUShort { Item = 0 };
+
+            var settings = new SerializerSettings
+            {
+                IgnoreDefaultValues = false,
+                Usings = ImmutableArray.Create("RoslynSerializer")
+            };
+
+            var result = SourceCodeSerializer.Serialize(obj, settings);
+
+            var expected = @"new ClassWithUShort
+{
+    Item = 0
+}";
+
+            _helper.WriteLine(result);
+            Assert.Equal(result, expected);
+        }
     }
 
     public class TestClass1
@@ -475,5 +497,10 @@ namespace Test
     public class IgnorableProperty2 : IgnorableProperty
     {
         public override int Field2 { get; set; }
+    }
+
+    public class ClassWithUShort
+    {
+        public ushort Item { get; set; }
     }
 }

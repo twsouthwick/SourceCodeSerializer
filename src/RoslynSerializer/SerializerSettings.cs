@@ -23,6 +23,8 @@ namespace RoslynSerializer
 
         public bool ObjectInitializationNewLine { get; set; } = true;
 
+        public bool IgnoreDefaultValues { get; set; } = true;
+
         public SourceGenerator Generator { get; set; }
 
         public ImmutableArray<string> Usings { get; set; } = ImmutableArray<string>.Empty;

@@ -54,7 +54,7 @@ namespace RoslynSerializer
 
             var type = obj.GetType();
 
-            if (type.GetDefault()?.Equals(obj) == true)
+            if (Settings.IgnoreDefaultValues && type.GetDefault()?.Equals(obj) == true)
             {
                 return null;
             }
