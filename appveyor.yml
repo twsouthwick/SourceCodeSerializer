@@ -5,11 +5,11 @@ build_script:
   - ps: .\Update-Version.ps1 $env:GitVersion_NuGetVersion
   - ps: dotnet --info
   - ps: dotnet restore
-  - ps: dotnet --verbose build .\test\RoslynSerializer.Test
-  - ps: dotnet --verbose pack .\src\RoslynSerializer -o .
+  - ps: dotnet --verbose build .\test\SourceCodeSerializer.Test
+  - ps: dotnet --verbose pack .\src\SourceCodeSerializer -o .
 
 test_script:
-  - cmd: dotnet test .\test\RoslynSerializer.Test
+  - cmd: dotnet test .\test\SourceCodeSerializer.Test
 
 artifacts:
   - path: '*.nupkg'

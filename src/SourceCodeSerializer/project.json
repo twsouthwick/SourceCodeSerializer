@@ -1,0 +1,26 @@
+﻿{
+  "version": "1.0.0-*",
+  "packOptions": {
+    "repository": {
+      "type": "git",
+      "url": "https://github.com/twsouthwick/SourceCodeSerializer"
+    },
+    "licenseUrl": "https://github.com/twsouthwick/SourceCodeSerializer/blob/master/LICENSE.md",
+    "summary": "A tool that serializes objects to C#"
+  },
+
+  "authors": [
+    "Taylor Southwick (twsouthwick@outlook.com)"
+  ],
+
+  "dependencies": {
+    "NETStandard.Library": "1.6.0",
+    "Microsoft.CodeAnalysis": "1.3.2"
+  },
+
+  "frameworks": {
+    "netstandard1.3": {
+      "imports": "portable-net45+win8"
+    }
+  }
+}
