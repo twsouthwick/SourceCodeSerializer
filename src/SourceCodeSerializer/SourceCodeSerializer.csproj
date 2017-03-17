@@ -1,0 +1,21 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <Authors>Taylor Southwick (twsouthwick@outlook.com)</Authors>
+    <TargetFramework>netstandard1.3</TargetFramework>
+    <AssemblyName>SourceCodeSerializer</AssemblyName>
+    <PackageId>SourceCodeSerializer</PackageId>
+    <PackageLicenseUrl>https://github.com/twsouthwick/SourceCodeSerializer/blob/master/LICENSE.md</PackageLicenseUrl>
+    <RepositoryType>git</RepositoryType>
+    <RepositoryUrl>https://github.com/twsouthwick/SourceCodeSerializer</RepositoryUrl>
+    <NetStandardImplicitPackageVersion>1.6.0</NetStandardImplicitPackageVersion>
+    <PackageTargetFallback>$(PackageTargetFallback);portable-net45+win8</PackageTargetFallback>
+    <SignAssembly>True</SignAssembly>
+    <AssemblyOriginatorKeyFile>SourceCodeSerializer.snk</AssemblyOriginatorKeyFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.CodeAnalysis" Version="2.0.0" />
+  </ItemGroup>
+
+</Project>

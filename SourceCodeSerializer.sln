@@ -1,16 +1,20 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25420.1
+# Visual Studio 15
+VisualStudioVersion = 15.0.26228.9
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "SourceCodeSerializer", "src\SourceCodeSerializer\SourceCodeSerializer.xproj", "{D39F3EF6-87DA-4BF0-813D-869C2C9E7936}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{37B2E304-7C84-47D0-A9DC-66AD1E3EF443}"
 	ProjectSection(SolutionItems) = preProject
-		global.json = global.json
+		appveyor.yml = appveyor.yml
+		GitVersion.yml = GitVersion.yml
+		LICENSE.md = LICENSE.md
+		README.md = README.md
+		Update-Version.ps1 = Update-Version.ps1
 	EndProjectSection
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "SourceCodeSerializer.Test", "test\SourceCodeSerializer.Test\SourceCodeSerializer.Test.xproj", "{96CC4F78-0AF8-4280-B855-20C03E9B959B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SourceCodeSerializer", "src\SourceCodeSerializer\SourceCodeSerializer.csproj", "{D39F3EF6-87DA-4BF0-813D-869C2C9E7936}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SourceCodeSerializer.Test", "test\SourceCodeSerializer.Test\SourceCodeSerializer.Test.csproj", "{96CC4F78-0AF8-4280-B855-20C03E9B959B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
