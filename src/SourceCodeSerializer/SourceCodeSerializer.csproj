@@ -1,6 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
+    <VersionPrefix>0.0.1</VersionPrefix>
     <Authors>Taylor Southwick (twsouthwick@outlook.com)</Authors>
     <TargetFramework>netstandard1.3</TargetFramework>
     <AssemblyName>SourceCodeSerializer</AssemblyName>
